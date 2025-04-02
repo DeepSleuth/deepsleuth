@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+_dsout.json
+_v2*.json
+.DS_Store
+
