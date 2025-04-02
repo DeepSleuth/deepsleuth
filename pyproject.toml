@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepsleuth"
+version = "0.1.0"
+description = "Deepsleuth — read the fine print. Deterministic deep-visibility security scanner for MCP servers (no LLM)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+dependencies = []
+
+[tool.setuptools]
+packages = [
+    "deepsleuth",
+    "deepsleuth.analysis",
+    "deepsleuth.detectors",
+    "deepsleuth.sandbox",
+    "deepsleuth.mcpclient",
+]
