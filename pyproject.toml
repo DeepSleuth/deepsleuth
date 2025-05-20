@@ -9,7 +9,18 @@ description = "Deepsleuth — read the fine print. Deterministic deep-visibility
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
+license-files = ["LICENSE*"]
+# Core scanner has NO third-party runtime dependencies — it speaks MCP over stdio
+# itself (see deepsleuth/mcpclient) so it runs in externally-managed (PEP 668)
+# environments and stays fully deterministic and offline. The Docker sandbox uses
+# the `docker` CLI (not a Python package). YAML policy files are supported via a
+# built-in flat parser; PyYAML is optional and only enables nested policy files.
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/DeepSleuth/deepsleuth"
+Repository = "https://github.com/DeepSleuth/deepsleuth"
+Issues = "https://github.com/DeepSleuth/deepsleuth/issues"
 
 [tool.setuptools]
 packages = [
