@@ -37,3 +37,27 @@ Offline (no network egress except to the Docker daemon). No threat feeds.
 
 ---
 
+## Install
+
+Python 3.11+. No required third-party packages — the scanner speaks MCP over stdio
+itself, so it installs in externally-managed (PEP 668) environments.
+
+```bash
+pip install git+https://github.com/DeepSleuth/deepsleuth.git   # zero required dependencies
+deepsleuth --help
+# or straight from the source tree:
+python -m deepsleuth --help
+```
+
+Deepsleuth is itself an MCP server, so agents can scan with it directly:
+
+```json
+{"mcpServers": {"deepsleuth": {"command": "python", "args": ["-m", "deepsleuth.mcp_server"]}}}
+```
+
+Tools: `list_detectors`, `check_listing`, `scan_target`.
+
+For the dynamic layer (Frontend B and `proxy-eval`) you need the **Docker CLI +
+daemon**. Without Docker the scanner **degrades gracefully**: static/manifest
+detectors still run and the skipped dynamic coverage is reported (never a crash).
+
