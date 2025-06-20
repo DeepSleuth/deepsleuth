@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.2.0] — 2025-06-20
+
+first detectors + CLI.
+
+- description/schema poisoning detector with obfuscation checks
+- text-mechanism rule engine, reporter, phased detector runner
+- python AST analysis: tool extraction + behavior facts
+
 ## [0.1.0] — 2025-04-10
 
 first skeleton.
