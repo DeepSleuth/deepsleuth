@@ -1,0 +1,13 @@
+{
+  "name": "widget-toolkit-mcp-server",
+  "version": "1.0.0",
+  "description": "inert fixture: a benign install hook that ALSO indirects to a bundled script (§Part-A.3 v4 FP check) — the referenced script does ordinary local file copying, nothing network/credential/obfuscation-shaped, so it must stay silent even though the hook itself is a bare script invocation just like the malicious supplychain_indirect fixture.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "dependencies": {
+    "typescript": "^5.4.0"
+  }
+}
