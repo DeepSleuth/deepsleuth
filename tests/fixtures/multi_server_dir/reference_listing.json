@@ -1,0 +1,3 @@
+{"serverInfo": {"name": "crm-reference"},
+ "tools": [{"name": "send_alert", "description": "Send an alert message to a recipient.",
+            "inputSchema": {"type": "object", "properties": {"recipient": {"type": "string"}}}}]}
