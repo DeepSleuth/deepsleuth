@@ -61,3 +61,34 @@ For the dynamic layer (Frontend B and `proxy-eval`) you need the **Docker CLI +
 daemon**. Without Docker the scanner **degrades gracefully**: static/manifest
 detectors still run and the skipped dynamic coverage is reported (never a crash).
 
+## Run
+
+```bash
+# Frontend B — batch/sandbox scanner (also the offline scoring harness)
+python -m deepsleuth scan <target> [--no-dynamic] [--json out.json] [--timeout N] [--reference-listing tools.json]
+
+# Frontend A — inline MCP gateway/proxy (the gate); speaks MCP on stdio to the agent
+python -m deepsleuth proxy <target> [--policy policy.yaml] [--fail-closed] [--log run.jsonl]
+
+# Frontend A headless — drive a deterministic call plan through the proxy, emit the findings JSON
+python -m deepsleuth proxy-eval <target> [--json out.json] [--timeout N] [--policy p]
+
+# list every registered detector
+python -m deepsleuth detectors
+```
+
+`<target>` can be a **server directory** (with `mcp.json` and/or source), an
+**`mcp.json`** launch spec, or a **raw stdio launch command** (e.g.
+`"python3 server.py"`). `scan` exits `0` when clean and non-zero once a finding
+reaches `--fail-severity` (default `high`).
+
+`--allow-unsandboxed` runs the dynamic layer **without** Docker — use it **only**
+for your own trusted fixtures, never on untrusted servers.
+
+`--reference-listing tools.json` supplies another server's tool list (a JSON
+array of `{name, description, inputSchema}` entries, or an object with a
+`tools` key) so the cross-server name comparison runs against it without
+launching a second server. The same comparison also runs automatically across
+several entries in one `mcp.json` and across several server entry modules
+found in one directory.
+
