@@ -21,3 +21,32 @@ choose which phases to run.
         └────────────────────────────────────┘                    └───────────────────────────────────┘
 ```
 
+## The shared context and phases
+
+`ScanContext` (`context.py`) holds: declared metadata (`tools`/`resources`/
+`prompts` as `ToolContract`s), captured `server_info`, source facts bound per tool,
+package manifests, the list of `CallRecord`s, a later re-listing for diffing, and
+the `CrossCallState` tracker (planted canaries + decoy-file markers).
+
+Detectors run in **phases** (`runner.py`), so each frontend triggers them at the
+right moment:
+
+| Phase | When | Detectors |
+|---|---|---|
+| `listing` | metadata/source/package available | poisoning, cross-tool-redirect/param-tampering/output-substitution/out-of-scope-param, taint, hint-vs-behavior/scope-creep, rug-pull-source, identity, supply-chain, auth |
+| `precall` | one pending `tools/call` | the gate pre-call detector |
+| `response` | a response captured | response-injection, response-redirect, canary/credential leak, over-sharing |
+| `multicall` | ≥2 calls / a re-listing | rug-pull runtime diff (incl. idempotent-declared-tool response diff) |
+
+`cross-server-name-overlap` (rule 4.1) is a separate cross-target pass run once
+over every `ScanContext` in a multi-server scan, not a per-phase detector —
+see `detectors/crossserver.compare_tool_names`.
+
+A detector declares a `requires` capability set (`manifest`/`source`/`dynamic`/
+`package`/`identity`); the runner skips it cleanly when that layer is absent, so a
+static-only run (no Docker) never crashes and simply reports reduced coverage.
+
+If a detector raises, the runner records a `severity: none` `detector-error`
+finding (coverage stays visible) and continues — one detector can never break a
+scan (rule 3.2).
+
