@@ -88,3 +88,19 @@ self-proving (calibration passes them through unconditionally) vs. calibrated.
   broadening it further risked reintroducing the clause-bridging FP class fixed
   above.
 
+## `ast-taint`
+- **Category:** `command-injection` / `path-traversal` / `ssrf` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism (rules 5.3b/5.6).** Tool parameters are tainted sources; taint propagates
+  through assignments / f-strings / joins to sinks: command exec (`subprocess`,
+  `os.system`, …), `eval`/`exec`, unsafe deserialize (`pickle`, `yaml.load` without
+  SafeLoader), file open/read/write/delete, and network calls. Reports the
+  source→sink path. Fires **only when a tainted value reaches the sink** —
+  `shell=True` with taint is `critical`.
+- **Precision gate.** A fixed/constant argument to the same sink is *not* flagged
+  (`subprocess.run(['git','--version'])`); `yaml.safe_load` is not flagged.
+- **Blind spots.** Intra-procedural only — taint through a helper function/method,
+  across modules, or via object attributes is under-tracked (recall gap). Sanitizers
+  are not modeled, so a properly-validated tainted path is still reported
+  (false-positive risk — confidence is lowered when taint is indirect). Python only;
+  JS/TS taint is not analyzed in v1. Dynamic `getattr`/reflection dispatch is missed.
+
