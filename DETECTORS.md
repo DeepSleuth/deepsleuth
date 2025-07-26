@@ -104,3 +104,19 @@ self-proving (calibration passes them through unconditionally) vs. calibrated.
   (false-positive risk — confidence is lowered when taint is indirect). Python only;
   JS/TS taint is not analyzed in v1. Dynamic `getattr`/reflection dispatch is missed.
 
+## `hint-violation` (+ `scope-creep`)
+- **Category:** `excessive-privilege` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism (rule 5.4).** The sharpest, most-generalizing signal: the declared
+  contract (`readOnlyHint`/`destructiveHint`, or a read-shaped description) vs. what
+  the implementation actually does. A `readOnlyHint:true` tool that writes/deletes/
+  spawns/execs/mutates state, or a `destructiveHint:false` tool that deletes, is a
+  verifiable contradiction. `scope-creep` is the softer no-hint variant (read-shaped
+  description but mutating body).
+- **Precision gate.** Keys on the *mismatch*, so a tool that writes files for its
+  stated purpose (write-shaped description, no readOnly claim) is not flagged.
+- **Blind spots.** Depends on hints/description existing; an honestly-undeclared tool
+  (no hints, ambiguous description) yields at most the low-confidence `scope-creep`.
+  Behavior reached only through a helper the analyzer doesn't enter is missed.
+  Network access under `readOnlyHint` is reported at `medium` (reading over the
+  network can be legitimate).
+
