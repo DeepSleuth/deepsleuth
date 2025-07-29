@@ -120,3 +120,8 @@ self-proving (calibration passes them through unconditionally) vs. calibrated.
   Network access under `readOnlyHint` is reported at `medium` (reading over the
   network can be legitimate).
 
+## Changelog
+Entries below marked **[v2]** were rewritten for precision on benign servers,
+two shallow response-content detectors, and mechanism/evidence-location
+attribution.
+
