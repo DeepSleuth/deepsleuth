@@ -125,3 +125,20 @@ Entries below marked **[v2]** were rewritten for precision on benign servers,
 two shallow response-content detectors, and mechanism/evidence-location
 attribution.
 
+## `rugpull-source` / `rugpull-runtime`
+- **Category:** `other` (source gates) / `tool-poisoning` (runtime diff) · **Evidence:** `source`, `multi-call-state` · **Phase:** listing / multicall
+- **Mechanism (rule 5.2).** Behavior that changes after inspection. *Source:* control
+  flow gated on a call-counter, wall-clock/date, or an env toggle that guards
+  mutating/exec/network behavior — a branch whose only purpose is "act differently
+  later." *Runtime:* re-list tools and diff declared metadata against the first
+  listing (any changed name/description/schema = strong signal); and diff responses
+  of an identical repeated call for a newly-introduced injection mechanism.
+- **Precision gate.** Call-counter/time gates are rare in honest tools; env gates are
+  only flagged when they guard dangerous behavior. Response-diff ignores volatile
+  tokens (timestamps/uuids/numbers) before comparing.
+- **Blind spots.** A time bomb that only triggers far outside the scan window, or
+  after more calls than the 2-pass plan makes, is missed. A benign counter (rate
+  limiting, pagination) can trip `rugpull-source` at low/medium (false-positive
+  risk). Server-side state flipped by an external event the sandbox can't cause is
+  invisible.
+
