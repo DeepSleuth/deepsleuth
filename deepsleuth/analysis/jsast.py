@@ -6,7 +6,7 @@ text rather than a real AST. It recovers the same two things Python source
 analysis already gives for free, which JS/TS source analysis gave nothing
 for at all:
 
-1. Every tool's declared *name* and *tool description* — high-level SDK
+1. Every tool's declared *name* and *description* — high-level SDK
    registration (``server.tool("name", "description", schema, handler)`` /
    ``server.registerTool("name", {description, inputSchema}, handler)``) and
    the low-level SDK's array-of-object-literals form
