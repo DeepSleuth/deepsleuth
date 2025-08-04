@@ -535,7 +535,7 @@ def _js_to_obj(value: Any, env: "_JsEnv", hops: int = 0, depth: int = 0) -> Any:
 
 def _js_listing_entry(obj: Any) -> Dict[str, Any]:
     """v5-6 static twin for JS/TS — the registration's own object fields
-    other than the name and the description, as tool listing-entry fields."""
+    other than the name and the description, as listing-entry fields."""
     if not isinstance(obj, dict):
         return {}
     return {k: v for k, v in obj.items() if k not in ("name", "description")}
