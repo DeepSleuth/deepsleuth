@@ -218,7 +218,7 @@ FAMILIES: List[Tuple[str, int, List[re.Pattern]]] = [
             # clause-scoped veto for an override that DEFERS TO THE USER,
             # which needs Python logic, not just a regex.)
             _rx(r"\b(new|updated|revised|real|actual)\b[^.!?\n]{0,20}\b(instruction|system prompt|directive|task)s?\b[^.!?\n]{0,20}(:|follow|are)"),
-            # rule P1.3 — authority over the user: the tool description asserts that ITS
+            # rule P1.3 — authority over the user: the description asserts that ITS
             # OWN directives outrank the user's actual request. A description's
             # only legitimate authority is to say what the tool does; claiming
             # priority over the user (rather than merely describing behavior) is
