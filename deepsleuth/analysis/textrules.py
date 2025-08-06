@@ -1164,7 +1164,7 @@ def analyze_text(text: str, *, norm: NormResult = None, voice: Optional[str] = N
 
     v5-1 — ``voice`` says the text is a DESCRIPTION ("description": a tool/
     resource/prompt description, where a bare imperative may open the first
-    sentence; "field": any other descriptive string of a tool listing entry). The
+    sentence; "field": any other descriptive string of a listing entry). The
     exfiltration and read_sensitive families then separate the tool
     describing its own function (``RuleResult.informational``, no score)
     from a directive (scored as before). ``subject_name`` is the described
