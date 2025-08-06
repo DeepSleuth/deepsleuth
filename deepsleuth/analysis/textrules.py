@@ -382,7 +382,7 @@ FAMILIES: List[Tuple[str, int, List[re.Pattern]]] = [
             _ClauseVetoed(_rx(r"\b" + _TOOL_NOUN + r"\b[^.!?\n]{0,15}\b" + _SUPERLATIVE + r"\b"),
                           _superlative_veto),
             # rule P1.4 — self as precondition: the description asserts itself (not
-            # a named sibling) as a mandatory the gate before some other action —
+            # a named sibling) as a mandatory gate before some other action —
             # "execute this tool before any subtraction", "before doing
             # anything else, call this tool first". This is the mirror case of
             # next_action_redirect (which names a DIFFERENT tool as the
