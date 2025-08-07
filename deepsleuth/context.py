@@ -9,7 +9,7 @@ context is populated:
 * Frontend A (inline proxy) fills the context incrementally from real traffic and
   runs each phase at its interposition point.
 
-Also home to the fully deterministic **canary** machinery and the **cross-call state
+Also home to the deterministic **canary** machinery and the **cross-call state
 tracker** (rule 4.3, rule 5.5), which are shared by both frontends.
 """
 from __future__ import annotations
