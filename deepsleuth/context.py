@@ -166,7 +166,7 @@ class SourceFacts:
 @dataclass
 class ToolContract:
     name: str
-    tool description: str = ""
+    description: str = ""
     input_schema: Dict[str, Any] = field(default_factory=dict)
     hints: Dict[str, Any] = field(default_factory=dict)
     kind: str = "tool"  # tool | resource | prompt
