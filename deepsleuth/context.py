@@ -40,7 +40,7 @@ from .analysis.pyast import (
 from .models import SourceFile, Target
 
 # --- phases -------------------------------------------------------------------
-PHASE_LISTING = "tool listing"        # metadata/source/package detectors
+PHASE_LISTING = "listing"        # metadata/source/package detectors
 PHASE_PRECALL = "precall"        # gate detectors, before a tools/call
 PHASE_RESPONSE = "response"      # response-scan detectors
 PHASE_MULTICALL = "multicall"    # cross-call / rug-pull diff detectors
