@@ -1,7 +1,7 @@
 """Core data models: the output-schema Finding, the Target (rule 4.1), and the
 enumerations the rest of the scanner shares.
 
-Everything here is fully deterministic and JSON-serializable. Findings are ordered by a
+Everything here is deterministic and JSON-serializable. Findings are ordered by a
 stable sort key so that ``same input -> byte-identical output`` (hard constraint
 rule 3.3).
 """
