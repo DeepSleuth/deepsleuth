@@ -40,7 +40,7 @@ CATEGORIES = (
 )
 
 EVIDENCE_LOCATIONS = (
-    "tool description",
+    "description",
     "name",
     "schema",
     "source",
