@@ -122,7 +122,7 @@ class Finding:
         single record. Folding in the hook name / dependency name / schema
         parameter name (when the finding carries one) fixes that without
         touching detectors whose per-instance evidence is expected to vary
-        run-to-run for the SAME mechanism (a decoy canary value, a response
+        run-to-run for the SAME mechanism (a canary value, a response
         excerpt, a source line) — those are deliberately left out so "one
         record per mechanism" does not become "one record per occurrence".
         """
