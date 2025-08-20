@@ -6,7 +6,7 @@ form before any rule runs, and by *flagging concealment* (zero-width, bidi,
 homoglyphs, encoded blobs) as suspicious in its own right — regardless of what the
 hidden content decodes to.
 
-No neural nets, no downloads: NFKC, a curated confusables table, fully deterministic
+No neural nets, no downloads: NFKC, a curated confusables table, deterministic
 base64/hex decoding, a light rule-based stemmer. Same input -> identical output.
 """
 from __future__ import annotations
