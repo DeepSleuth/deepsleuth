@@ -1,6 +1,6 @@
 """Deterministic text-normalization pipeline (rule 5.1).
 
-The single most brittle thing existing tool description-poisoning detectors do is match
+The single most brittle thing existing description-poisoning detectors do is match
 exact phrasings. We defend generalization by *normalizing* text to a canonical
 form before any rule runs, and by *flagging concealment* (zero-width, bidi,
 homoglyphs, encoded blobs) as suspicious in its own right — regardless of what the
