@@ -267,7 +267,7 @@ def _try_decode_blobs(text: str) -> List[str]:
         if blob in seen:
             continue
         seen.add(blob)
-        # entropy the gate: skip low-entropy runs (e.g. long words) to avoid noise
+        # entropy gate: skip low-entropy runs (e.g. long words) to avoid noise
         if _shannon_entropy(blob) < 3.2:
             continue
         try:
