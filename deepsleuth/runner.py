@@ -47,7 +47,7 @@ def run_phase(ctx: ScanContext, phase: str,
 
 def run_all(ctx: ScanContext, phases=None,
             collect_errors: Optional[List[str]] = None) -> List[Finding]:
-    phases = phases or ("tool listing", "precall", "response", "multicall")
+    phases = phases or ("listing", "precall", "response", "multicall")
     findings: List[Finding] = []
     for ph in phases:
         findings.extend(run_phase(ctx, ph, collect_errors))
