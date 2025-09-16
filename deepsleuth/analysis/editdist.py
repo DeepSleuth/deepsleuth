@@ -42,5 +42,3 @@ def damerau_levenshtein(a: str, b: str, cap: int = 4) -> int:
                     and a[i - 2] == b[j - 1]):
                 d[i][j] = min(d[i][j], d[i - 2][j - 2] + 1)  # transposition
     return d[la][lb]
-
-# TODO: revisit before 1.0
