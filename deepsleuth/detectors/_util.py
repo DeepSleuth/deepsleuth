@@ -30,5 +30,3 @@ def mk(ctx: ScanContext, *, detector_id: str, category: str, evidence_location: 
         source_kind=source_kind,
         detector_id=detector_id,
     )
-
-# TODO: revisit before 1.0
