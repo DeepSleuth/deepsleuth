@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.3.0] — 2025-09-26
+
+static analysis engine.
+
+- taint tracking with one level of call inlining + sanitizer modeling
+- privilege, env-dump, constant-assembly, static-response detectors
+- first bundled fixtures + offline scoring harness
+
 ## [0.2.0] — 2025-06-20
 
 first detectors + CLI.
