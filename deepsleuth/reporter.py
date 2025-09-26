@@ -59,5 +59,3 @@ def max_severity_rank(findings: List[Finding]) -> int:
     for f in findings:
         r = max(r, SEVERITY_RANK[f.severity])
     return r
-
-# TODO: revisit before 1.0
