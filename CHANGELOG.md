@@ -4,6 +4,13 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.3.1] — 2025-10-17
+
+fixes.
+
+- fix exit codes honoring confidence floors
+- fix tools/list parsing for servers without descriptions
+
 ## [0.3.0] — 2025-09-26
 
 static analysis engine.
