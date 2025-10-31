@@ -50,3 +50,34 @@ If a detector raises, the runner records a `severity: none` `detector-error`
 finding (coverage stays visible) and continues — one detector can never break a
 scan (rule 3.2).
 
+## v4: detection vs. calibration (`calibration.py`)
+
+Detectors run at **full sensitivity** and always emit their finding — recall is
+never lost to an internal threshold. Immediately after each phase's detectors
+run, `runner.run_phase` calls the single shared **calibration** layer
+(`calibration.py`), which sets each finding's `confidence` from a deterministic
+contract-vs-behavior **contradiction** signal (+ corroboration across evidence
+locations on the same tool) and never deletes a finding or touches `severity`.
+Because this hook lives inside `run_phase` — which both `scanner.py` (Frontend
+B, via `run_all`) and `proxy.py`/`gate_precall` (Frontend A, live and
+`proxy-eval`) call for every phase — calibration is applied identically
+everywhere without either frontend having to remember to invoke it.
+
+A tool whose own description openly declares the exact dangerous capability a
+sink reaches (running a command, fetching a caller-supplied URL) is reported
+in a separate, low-severity **capability lane** instead of as an injection/ssrf
+finding (rule P3.7, `detectors/taint.py`, `detection_method: declared-capability`)
+— an honest tool stating its own job is not treated identically to one hiding
+the same behavior.
+
+A finding's `evidence_location`/`category`/`severity` says *what* was found;
+`confidence` (set by calibration) says *how sure we are it's real*, and the
+gate acts on both together (the ACTIONABLE bar: `severity ∈ {medium,high,
+critical} AND confidence ∈ {medium,high}`). Some mechanisms are self-proving —
+a planted canary surfacing in an unrelated response, a decisive agent-directed
+directive in a tool's own output, a hint contradicted by observed behavior, a
+tainted source→sink path — calibration passes these through untouched
+(`calibration.UNCONDITIONAL_DETECTOR_IDS`). Others (auth/audit "claimed but
+absent", supply-chain hook shape, tool-poisoning corroboration) get their
+confidence computed centrally instead of scattered per-detector.
+
