@@ -81,3 +81,28 @@ tainted source→sink path — calibration passes these through untouched
 absent", supply-chain hook shape, tool-poisoning corroboration) get their
 confidence computed centrally instead of scattered per-detector.
 
+## Frontend B — batch / sandbox scanner (`scanner.py`)
+
+1. `target_loader.py` normalizes the target into a `Target` (launch spec +
+   discovered source + package manifests).
+2. Static context is built: Python modules parsed (`analysis/pyast.py` —
+   decorator-registered, functionally-registered, and low-level-SDK
+   `list_tools`/`call_tool`-dispatched tools alike, rule 2.7) and JS/TS modules
+   text-scanned (`analysis/jsast.py`, rule 2.8); tools extracted, behavior facts
+   computed (taint with one level of call inlining + sanitizer modeling,
+   rule 2.6), contracts synthesized from source.
+3. If dynamic is enabled and Docker is present, `sandbox/docker_sandbox.py`
+   launches the server **non-root, `--network none`, read-only rootfs, tmpfs home
+   seeded with decoy secret files, CPU/mem/pids/time limits**. `mcpclient` drives a
+   deterministic call plan (`sandbox/argsynth.py`): a burst phase (each tool called
+   several times in a row, reset-like tools deferred to the end, rule 3.1), the
+   round-robin passes with schema-derived arguments and planted canaries, then
+   a small capped tail of extra calls trying source-harvested candidate values,
+   every remaining schema `enum` value, and relative/`../` path variants
+   (rules 3.2/3.3). Every response is captured; every listed resource and prompt
+   is also **read** (`resources/read`/`prompts/get`, rule 3.4) and folded into the
+   same call log the response detectors scan; tools are re-listed for the
+   rug-pull diff.
+4. All phases run; findings are deduped `(target, tool, mechanism)` and emitted in
+   stable order.
+
