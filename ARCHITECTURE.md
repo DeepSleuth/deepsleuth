@@ -106,3 +106,41 @@ confidence computed centrally instead of scattered per-detector.
 4. All phases run; findings are deduped `(target, tool, mechanism)` and emitted in
    stable order.
 
+## Frontend A — inline gateway / proxy + gate (`proxy.py`, `gate.py`)
+
+A transparent MCP proxy with three interposition points (rule 4.7):
+
+1. **startup / `tools/list` audit** — fetch real tools/resources/prompts, run the
+   `listing` detectors, cache the listing; per policy **pass / annotate / withhold**
+   each tool. On any later `tools/list`, re-fetch and **diff** against the cache — a
+   changed name/description/schema at runtime is a rug-pull signal. Also runs
+   `pinning.check_and_update_pin` (rule 4.2): a persisted hash of this server's
+   handshake identity + live tool-name set, plus (rule P6.8) a per-tool
+   fingerprint of each tool's own description/schema/hints, is compared
+   against prior sessions under the same target id, and against every OTHER
+   target's pin — a changed identity, a same-named tool whose description or
+   schema was silently rewritten, or two differently-keyed targets sharing
+   one identity (a shadow server), all fire here even when nothing else about
+   the server's behavior looks wrong. The finding reports exactly what
+   changed (added/removed/modified tool names); an addition alone (nothing
+   removed/modified) is informational, not a rug-pull signal.
+2. **the GATE, before every `tools/call`** — build a context from tool metadata +
+   this call's arguments + accumulated cross-call state, run the `precall`
+   detectors, and apply the policy decision.
+3. **response scan** — run the `response` detectors, then **pass / annotate /
+   redact / block** before returning to the agent; everything feeds the cross-call
+   tracker so a canary passed into call *A* is caught surfacing in call *B*.
+
+**The gate (`gate.py`)** is a pure function over findings + a `Policy`, so it is
+identical in the live proxy and in headless `proxy-eval`, and unit-testable without
+a client. Default posture: clean → `allow`; uncertain / low-medium → `confirm`
+(pause, surface the risk log to the user via MCP **elicitation**, wait for
+approval); high/critical → `block`. A `confirm` that can't be resolved (no
+elicitation, or `--fail-closed`) becomes `block` — never a silent allow.
+
+`proxy-eval` drives the same deterministic call plan Frontend B uses through the
+same gate and emits findings JSON with `raw.gate_decision` on each finding, so Frontend A
+can be scored offline. It launches the downstream in the Docker sandbox (benchmark
+servers are untrusted) and, for scoring completeness, observes every response even
+when the live gate would have blocked pre-forward (the decision is still recorded).
+
