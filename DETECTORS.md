@@ -230,3 +230,61 @@ attribution.
   redirect check still requires an exfiltration/concealment/override-shaped verb —
   a redirect phrased with none of those verb classes at all is still a miss.
 
+## `response-leak`
+- **Category:** `data-exfiltration` / `credential-exposure` / `information-disclosure` · **Evidence:** `multi-call-state`, `runtime-response` · **Phase:** response
+- **Mechanism (rule 5.5).** Deterministic via planted canaries: (a) a canary passed into
+  call A surfacing in a later unrelated response = cross-call state leakage; (b)
+  decoy-file content (seeded at sensitive sandbox paths) in a response = a sensitive
+  read; (c) credential-shaped values/keys beyond the tool's described scope =
+  over-sharing / credential exposure.
+- **v2: shape/volume over-sharing vs. declared scope (`_scope_oversharing`).** (c)
+  above only ever caught secret-*shaped* keys/values — it missed the general
+  mechanism the brief describes: "extra records, extra fields, adjacent-entity data"
+  that isn't itself secret-shaped (e.g. a bulk list of unrelated user records with
+  emails/SSNs returned by a tool that promises "the weather for a city"). We now
+  parse the response as JSON and deterministically compare its *shape* against the
+  description: (1) an embedded list of ≥2 dict records fires when the description
+  doesn't itself promise a collection (no "list/all/records/results/..." word); (2)
+  a response whose field-name vocabulary shares no overlap with the description's
+  own words, for ≥3 fields and >40% of all fields, fires as scope-exceeding. A
+  response that returns exactly what the description names (e.g. "name, email and
+  phone" → `{"name","email","phone"}`) produces zero unrelated fields and does not
+  fire. Precision and recall for this are still measured on `tests/fixtures/
+  oversharing` (`get_contact` clean / `get_weather` fires) —
+  `tests/test_response_detectors.py`.
+- **Precision gate.** Our own inert canaries are stripped before the credential-shape
+  scan; over-sharing only fires when the description never mentions secrets (for the
+  key/value check) or when the response has an actual declared description to
+  compare its shape against (for the new shape check — no description means nothing
+  to contradict, so it does not fire).
+- **v4 root-cause fix (Part-A.1 — "missing on a large fraction of cases").** The
+  multi-call protocol *was* planting recognizable canaries and scanning every
+  later response for them (`context.CrossCallState`) — the mechanism itself was
+  never broken. The regression was a single case-sensitivity bug:
+  `CanaryFactory.secret("token", ...)` deliberately **lowercases** the
+  `MCPSCANCANARY` prefix so a token-shaped canary looks like a realistic secret
+  (`sk-mcpscancanary-<hash>`, matching real API-key casing conventions), but
+  `CanaryFactory.is_canary` did a case-*sensitive* substring check for the
+  literal uppercase `MCPSCANCANARY` — so every token-shaped canary silently
+  failed `is_canary`, was never registered as a planted origin
+  (`CrossCallState.note_call_args`), and could never be recognized surfacing in
+  a later response. This canary shape is exactly what `sandbox/argsynth.py`
+  synthesizes for **any** secret/password/token/api_key/credential/auth-named
+  parameter (`_SECRET_HINT`) — i.e. the single most realistic and common
+  cross-call-leak trigger (a tool that legitimately accepts a token/API key
+  argument). Fixed by making `is_canary` case-insensitive. Verified live,
+  end-to-end, through a real Docker-launched server
+  (`tests/test_dynamic_e2e.py`, `tests/fixtures/runtime`) as well as directly
+  against the detector (`tests/test_multicall.py`, 5 cases: token-shaped
+  canary leak, generic-arg canary leak, decoy-file leak, and two benign
+  no-leak/explicit-resupply cases that must NOT fire).
+- **Blind spots.** (b) requires the Docker sandbox (decoy files aren't seeded
+  unsandboxed). A server that transforms/encodes the canary before leaking it evades
+  the exact-match cross-call scan. Credential-shape regexes cover common formats
+  (private keys, AWS/GitHub/Slack tokens, JWTs) but not every bespoke secret. The
+  shape-based over-sharing check is JSON-only (a non-JSON/plain-text bulk response is
+  not shape-compared) and its vocabulary-overlap test is a bag-of-words heuristic,
+  not true semantics — a field named with a synonym the description doesn't use
+  (e.g. description says "temperature", response key is "reading") can still false
+  positive if enough other fields are also unrelated.
+
