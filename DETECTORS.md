@@ -288,3 +288,15 @@ attribution.
   (e.g. description says "temperature", response key is "reading") can still false
   positive if enough other fields are also unrelated.
 
+## `gate-precall` (`gate-secret-arg`, `gate-taint-call`, `gate-readonly-call`)
+- **Category:** `confused-deputy` / `command-injection` / `excessive-privilege` · **Evidence:** `schema` · **Phase:** precall
+- **Mechanism (rule 4.7 point 2).** Per-call gate signals: a credential/secret-shaped
+  argument (or a planted canary) heading to a tool whose described scope doesn't
+  justify secrets and that can reach the network; a call to a tool with a known
+  source taint path to a dangerous sink; a `readOnlyHint` tool being invoked in a way
+  source shows mutates.
+- **Blind spots.** Secret-shape heuristics (entropy + named-like-a-secret) can miss a
+  low-entropy secret or flag a high-entropy benign token (confidence scaled
+  accordingly). "Network-capable" is judged from source, so a network path the
+  Python analyzer can't see weakens the confused-deputy escalation.
+
