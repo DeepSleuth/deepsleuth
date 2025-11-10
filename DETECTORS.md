@@ -300,3 +300,49 @@ attribution.
   accordingly). "Network-capable" is judged from source, so a network path the
   Python analyzer can't see weakens the confused-deputy escalation.
 
+## `server-identity` / `tool-shadowing`
+- **Category:** `tool-shadowing` · **Evidence:** `server-identity`, `name`, `description` · **Phase:** listing
+- **Mechanism (rule 5.7).** Metadata asserting this tool *is*/*replaces*/*overrides*/
+  *shadows* another named entity (identity-assertion + reference-to-another-entity);
+  duplicate tool names within one listing; handshake `serverInfo` advertising an
+  authority-claiming identity inconsistent with the configured/package identity.
+- **v2 precision gate.** v1's `SHADOW_RE` fired on a shadow-verb followed within 40
+  chars by *any* generic noun (`tool|function|command|server|...`), so an honest
+  tool describing its own prior behavior ("this supersedes the old inline edit
+  **command**") tripped it — incidental lexical overlap between a server's own
+  sibling tools, not a collision. It now requires the shadow-verb to co-occur with
+  an explicit reference to a *different, named* entity: a quoted/backticked name,
+  "the real/official/genuine/... X", or "another/other tool/server/...". A genuine
+  claim ("replaces the official `` `get_weather` `` tool") still fires; "replacing
+  its previous contents... supersedes the old inline edit command" does not
+  (`tests/fixtures/benign_multitool` vs. `tests/fixtures/tool_shadow`). The
+  handshake `serverInfo`-vs-configured-identity check now normalizes both names
+  (strip non-alphanumerics, lowercase) and only fires on a genuine mismatch, not a
+  formatting difference ("System Monitor" vs. "system-monitor").
+- **v3 generalization fix (V3-2).** The v2 fix still over-fired on legitimately
+  designed servers with different wording: `OTHER_ENTITY`'s bare "other/another
+  tool(s)" branch matched a coordinator honestly describing itself ("Acts as a
+  coordinator that delegates to **the other tools in this same server**"), because
+  nothing distinguished "another tool" (foreign) from "the other tools in this
+  server" (self-referential, i.e. its own siblings). Added `SELF_REF` — a
+  self-referential-context check (`in/on/within/of/from this (same) server/tool/
+  package/suite/toolkit/project/...`, `its own`, `itself`) scanned in the 30-char
+  window before and 50-char window after any `SHADOW_RE` candidate match; a
+  candidate inside that window is disqualified, and the search continues to the
+  next candidate rather than aborting outright. Verified clean across
+  `tests/fixtures/benign_multitool` *and* `tests/fixtures/benign_multitool2`
+  (different vocabulary: "delegates to other tools", "supersedes ... within this
+  package", "proxy in front of the other ... in this toolkit itself") while
+  `tests/fixtures/tool_shadow` *and* `tests/fixtures/tool_shadow2` ("claims to be
+  ... masquerades as another tool") still fire — also added `claim\w*\s+to\s+be` to
+  `SHADOW_VERB`, which v2's verb list was missing entirely.
+- **Blind spots.** Cross-server typosquatting/namespace collision needs a *set* of
+  servers; v1's one-server proxy can't compare against sibling servers. Impersonation
+  by exact-copying a trusted server's real name (no "official/replaces" language and
+  a matching-looking config) is not caught without a trusted registry to diff against.
+  The tightened `SHADOW_RE` still requires an explicit other-entity marker, so a
+  shadowing claim phrased without a quote/backtick or one of the authority
+  adjectives (e.g. a bare "this tool takes precedence over X" with X unquoted and
+  not preceded by "another/other") can be missed — a recall/precision trade we
+  accepted because the report named over-firing as the priority.
+
