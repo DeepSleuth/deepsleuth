@@ -346,3 +346,91 @@ attribution.
   not preceded by "another/other") can be missed — a recall/precision trade we
   accepted because the report named over-firing as the priority.
 
+## `supply-chain`
+- **Category:** `supply-chain` · **Evidence:** `install-time-script` · **Phase:** listing
+- **Mechanism (rule 5.8).** npm lifecycle hooks (`pre/post/install`, `prepare`, …) and
+  `setup.py`/`pyproject` build hooks that execute code before the server ever
+  launches. Plus dependency names within edit-distance 1 of popular packages
+  (typosquat). Install scripts are **never executed** here.
+- **v2 precision gate.** v1 reported *every* install/build hook, even an ordinary
+  `tsc -p .` / `node-gyp rebuild` / `npm run build`, at `low` severity. v2 added a
+  `DANGER`/`ADHOC` bag-of-tokens gate, which the v3 evaluation found still over-fired
+  badly on ordinary builds with slightly different wording: `chmod +x dist/mytool`
+  after a local compile, `/tmp/` in a cache path, and a bare `node -e "console.log(1)"`
+  all matched `DANGER` at `high` (the token list included bare `chmod\s+\+x`, `/tmp/`,
+  and `node\s+-e`/`python[0-9]?\s+-c` with no requirement that anything dangerous
+  actually be *inside* the inline command) — none of which "an install step has no
+  honest reason to do."
+- **v3 rebuild (V3-2/V3-3).** Replaced the single token bag with the report's own
+  three named shapes, each its own narrow, structural signal instead of lexical
+  proximity: (1) **fetch-and-execute** — a network-fetch client invocation
+  (`curl`/`wget`/a bare URL/`iwr`/…) *and* an execution sink in the same command:
+  piped straight into an interpreter (`| sh`/`| bash`/`| iex`), a `sh -c "$(curl
+  ...)"` command-substitution shell-out, or a `chmod +x PATH && PATH`/`./PATH`
+  structural re-execution of the *same* just-fetched path (a backreference, not a
+  fixed phrase — so it isn't tied to any one command's exact wording); (2)
+  **credential-shaped path** (`.ssh/`, `id_rsa`, `.aws/credentials`, `.netrc`,
+  `.npmrc`, `/etc/passwd`, `.env`, …) referenced anywhere in the hook; (3)
+  **obfuscated/encoded content** (`base64 -d`, `atob(`, `fromCharCode`,
+  `Buffer.from(..., 'base64')`, `base64.b64decode(`); plus an unambiguous
+  destructive/reverse-shell literal (`rm -rf /`, a fork bomb, `mkfifo ... /dev/tcp/`)
+  as a fourth catch-all. A bare `chmod +x` on a locally-built binary, a `/tmp/`
+  path, or an inline `-e`/`-c` one-liner with ordinary content no longer contributes
+  anything on its own. `_scan_setup_py` was rebuilt the same way (its `cmdclass`/
+  custom-install-class `medium` tier is unchanged — that is a structural "setuptools'
+  default install machinery was overridden" signal, not a lexical guess).
+- **Verification (V3-3 discipline).** `tests/fixtures/benign_package` (unchanged),
+  `benign_package2` (cmake/electron-builder/husky — different tool vocabulary), and
+  `benign_package3` (chmod on a freshly-built local binary + inline `console.log`)
+  are all clean; `tests/fixtures/supplychain` (curl-pipe-to-bash reading `~/.ssh/
+  id_rsa`) and `supplychain2` (a different shape — `.aws/credentials` read + `curl`
+  upload, no pipe-to-shell at all) both still fire `high`.
+- **v4 rebuild (Part-A.3 — this regressed to near-zero).** The v3 gate was
+  *inline-only*: a hook that merely invoked a bundled script (`"postinstall":
+  "node scripts/postinstall.js"`) was never followed into that file, and a bare
+  network fetch with no exec signal in the same command was never reported at
+  all — but "indirection through a bundled script is the common real case," per
+  the v4 brief. Two fixes, neither weakening the inline checks:
+  1. **Referenced-script analysis.** `_referenced_script_paths` extracts a local
+     script reference from the hook command (`node <path>.js`, `python3
+     <path>.py`, `bash <path>.sh`, `ruby <path>.rb`, or a bare `./path`);
+     `_resolve_script_text` looks it up in the target's already-collected source
+     files or (for a local directory scan) reads it directly from disk — **never
+     executes it**; `_script_danger` then re-applies the *same* credential-path /
+     obfuscation / destructive-construct checks, plus a library-call-shaped
+     fetch+exec pair (`_SCRIPT_NETWORK` + `_SCRIPT_EXEC`: `require('https')`/
+     `fetch(`/`axios`/`import requests`/… combined with `child_process`/`exec(`/
+     `subprocess.`/`eval(`/…) to the **script's own content**. A hook that
+     invokes an ordinary local build/copy script (no network/credential/
+     obfuscation signal in that script) still stays silent — the payload has to
+     actually be there, just not necessarily inline in the hook string anymore.
+  2. **A bare network call is now reported on its own** (`_classify_hook_cmd`),
+     at `high` severity but `medium` confidence — still actionable (the gate can
+     `confirm` it) without being an automatic `block`, since a legitimate
+     "download a prebuilt binary" hook and an exfiltration/second-stage-fetch
+     hook look identical from the command line alone.
+  `_classify_hook_cmd`/referenced-script findings tag `raw.dangerous_shape` —
+  the calibration layer (`calibration.py`) keeps `confidence` at its
+  detector-assigned value unconditionally when `dangerous_shape` is true
+  (network+exec, credential-path, obfuscation, or a dangerous referenced
+  script — the contradiction is self-proving for an install step) and leaves
+  the softer structural signals (typosquat, `cmdclass` override, in-tree build
+  backend) exactly as the detector assigned them.
+- **Verification (V4 discipline).** `tests/fixtures/supplychain_indirect`
+  (clean `"node scripts/postinstall.js"` hook line; the *script* fetches and
+  `exec`s remote content) fires `high`/`high` attributing the rationale to the
+  referenced script; `tests/fixtures/benign_package_indirect` (same
+  bare-script-invocation shape, but the script only copies local files) stays
+  completely clean; `tests/fixtures/supplychain_networkonly` (a bare `curl -o
+  ... https://...`, no exec) fires `high`/`medium` — actionable (`confirm`) but
+  not `block`.
+- **Blind spots.** The "popular package" list is a small generic seed, so a
+  typosquat of an unlisted package is missed, and edit-distance-2 squats
+  (transpositions like `lodahs`) fall outside the ≤1 gate. Malicious code hidden
+  in a normal dependency (not a lifecycle hook and not a name collision) is out
+  of scope. Referenced-script resolution is best-effort: a script reached only
+  through a further layer of indirection (a Makefile target, a second hook that
+  chains to a third script, a script name built at install time) is not
+  followed; `setup.py`'s own hook scan still checks its own text only, not a
+  script it might `subprocess.check_call` out to.
+
