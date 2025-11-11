@@ -434,3 +434,72 @@ attribution.
   followed; `setup.py`'s own hook scan still checks its own text only, not a
   script it might `subprocess.check_call` out to.
 
+## `auth-gap` / `auth-control-ineffective` / `audit-gap` / `weak-session`
+- **Category:** `auth-misconfiguration` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism (rule 5.9, rule P3.2).** v1 fired on the *lexical absence* of an auth/logging
+  token in a sensitive/destructive tool body — the single biggest false-positive
+  source of the original detector, and simultaneously low-recall (a merely
+  auth-*named* dead parameter like `is_authorized` already contains the substring
+  "auth", so the lexical check misread a bypass as "has an auth check"). v2 replaces
+  the absence heuristic with control-flow reasoning
+  (`analysis/pyast.analyze_auth_control`) and only reports a *positive* signal:
+  - **`auth-control-ineffective` (new, rule P3.2).** An auth-shaped call or a
+    permission-shaped parameter (`is_authorized`, `has_role`, `auth_token`, …) is
+    present, but provably does not gate the sensitive action: the call's result is
+    discarded (a bare `is_authorized(token)` statement), the parameter is never
+    referenced again in the body, or no branch of a guarding `if`/`assert` halts
+    (`raise`/`return`/`continue`/`break`) when the check fails. This is a verifiable
+    structural contradiction — "control present but ineffective," distinct from "no
+    control present" — so it is reported at real severity (medium/high, scaled by
+    whether the ungated action is itself destructive/sensitively-named) and `high`
+    confidence.
+  - **`auth-gap`** now only fires when the description/name *explicitly claims* an
+    authorization requirement ("requires a valid authorization token", "admin
+    only", "must be authenticated", ...) and the body has **no** auth-shaped signal
+    of any kind (neither an ineffective one) — a genuine declared-vs-implemented
+    contradiction, not a guess from the tool's name alone.
+  - **`audit-gap`** mirrors this for logging: only fires when the description
+    explicitly promises an audit trail the body does not implement.
+  - **`weak-session`** is unchanged — it was never an absence check, it fires on a
+    *positive* bad pattern (a session/token assigned from a guessable source).
+  An honestly-declared, legitimately-unauthenticated utility tool (destructive for
+  its stated purpose, no auth claim, no auth-shaped parameter) now produces **no
+  finding** (`tests/fixtures/benign_auth`), while a tool whose auth control is
+  merely decorative still fires with high confidence
+  (`tests/fixtures/authbypass`). This also directly serves rule P3.1 (mechanism
+  attribution): removing the noisy absence-only finding stops it from ever being
+  the leading/only finding for a case whose real mechanism is something else.
+- **v4: calibration corroboration (Part-B).** `auth-control-ineffective` (a
+  *proven* contradiction — a real control that demonstrably doesn't gate the
+  action) is unconditional; `calibration.py` never lowers it. `auth-gap`/
+  `audit-gap` fire on a claimed-but-absent requirement, which is real signal but
+  varies in strength — the detector now also exposes `raw.destructive`/
+  `raw.sensitive_named` (the same signals it already computes for its own
+  severity elsewhere), and calibration sets `confidence` from them: corroborated
+  by real destructive/sensitive capability on the same tool → `medium`
+  (actionable); no corroboration (a low-stakes claim with nothing backing it,
+  as likely to be an honest external-middleware dependency as a real gap) →
+  `low` (still reported — recall@present is preserved — but the gate does not
+  act on it alone). `tests/fixtures/authgap_lowstakes` (uncorroborated, must
+  stay non-actionable) and `tests/fixtures/authgap_corroborated` (identical
+  claimed-but-absent shape, but on a destructive `delete_record` tool, must
+  stay actionable) — `tests/test_calibration.py`.
+- **Blind spots.** Still fundamentally per-function and intra-procedural: auth
+  enforced by a decorator, a framework middleware, or a caller-side gateway is
+  invisible to this pass — a benign tool authorized entirely outside its own body
+  can still (rarely, now that absence alone never fires) be miscounted if its
+  description happens to explicitly claim a requirement. The control-flow
+  effectiveness check is heuristic, not a real CFG/dataflow engine: a guard whose
+  halting branch is nested inside another conditional several levels down, or that
+  delegates the decision to a call several hops away, can still be misread as
+  ineffective (or as no-signal-at-all if the auth-shaped name is buried in a helper
+  the analyzer doesn't enter).
+- **v5: constant-stub delegation.** `analyze_auth_control` now also inspects the
+  *callee*: `_collect_stub_true_functions` (module-wide pre-pass) flags a helper
+  function that accepts an argument, never references it anywhere in its body, and
+  every `return` path is a hard-coded truthy literal. A caller that gates on such a
+  function (`if not check_permission(role): return`) is control-flow-perfect but
+  still gates on nothing, because the callee can never say no — `auth-control-
+  ineffective` now fires on this shape too, unconditional in calibration like the
+  rest of this detector.
+
