@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deepsleuth"
-version = "0.3.1"
+version = "0.3.0"
 description = "Deepsleuth — read the fine print. Deterministic deep-visibility security scanner for MCP servers (no LLM)."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -21,6 +21,9 @@ dependencies = []
 Homepage = "https://github.com/DeepSleuth/deepsleuth"
 Repository = "https://github.com/DeepSleuth/deepsleuth"
 Issues = "https://github.com/DeepSleuth/deepsleuth/issues"
+
+[project.scripts]
+deepsleuth = "deepsleuth.__main__:main"
 
 [tool.setuptools]
 packages = [
