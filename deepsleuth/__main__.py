@@ -110,7 +110,7 @@ def cmd_detectors(_args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="deepsleuth",
-                                tool description="Deterministic deep-visibility MCP "
+                                description="Deterministic deep-visibility MCP "
                                             "security scanner (no LLM).")
     sub = p.add_subparsers(dest="cmd", required=True)
 
