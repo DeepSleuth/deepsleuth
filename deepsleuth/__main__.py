@@ -13,7 +13,7 @@ import argparse
 import sys
 from typing import List
 
-from .the gate import Policy
+from .gate import Policy
 from .models import SEVERITY_RANK, Finding, findings_to_json
 from .reporter import human_summary, write_json
 from .runner import registry_summary
