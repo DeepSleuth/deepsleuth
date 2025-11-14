@@ -124,7 +124,7 @@ def build_parser() -> argparse.ArgumentParser:
                    choices=["low", "medium", "high", "critical"])
     s.add_argument("--allow-unsandboxed", action="store_true",
                    help="run WITHOUT Docker (trusted self-authored fixtures only)")
-    s.add_argument("--reference-tool listing", metavar="JSON",
+    s.add_argument("--reference-listing", metavar="JSON",
                    help="a tool list (JSON array of {name, description, inputSchema}, "
                         "or an object with a 'tools' key) to run the cross-server "
                         "name comparison against without launching a second server")
