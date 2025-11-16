@@ -1,4 +1,4 @@
-"""v6-W6 — fully deterministic constant folding for string-assembling expressions.
+"""v6-W6 — deterministic constant folding for string-assembling expressions.
 
 A literal-based matcher (static response poisoning, the tool description poison
 families) is blind to a string that never appears as a literal: an
