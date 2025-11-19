@@ -1,6 +1,6 @@
 """v6-W6 — deterministic constant folding for string-assembling expressions.
 
-A literal-based matcher (static response poisoning, the tool description poison
+A literal-based matcher (static response poisoning, the description poison
 families) is blind to a string that never appears as a literal: an
 agent-directed instruction assembled at runtime from integer CONSTANTS --
 ``"".join(chr(c) for c in (73, 103, ...))``, ``chr(73) + chr(103) + ...``,
