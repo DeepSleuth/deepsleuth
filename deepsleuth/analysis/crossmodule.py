@@ -370,7 +370,7 @@ def augment_facts(facts: BehaviorFacts, tool_node: ast.AST, entry: ModuleInfo,
     for r in reached:
         mi = r.module
         index.resolve_imports(mi)
-        # v6 — counter-the gate thresholds of every reached function (any hop):
+        # v6 — counter-gate thresholds of every reached function (any hop):
         # sizes the call plan; deliberately NOT ``uses_call_counter_gate``.
         try:
             for thr in scan_counter_gates(r.node, _module_level_names(mi.tree)):
