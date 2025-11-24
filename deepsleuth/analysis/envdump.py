@@ -5,7 +5,7 @@ A tool that hands back the WHOLE process environment -- ``str(dict(os.environ))`
 ``json.dumps(dict(os.environ))``, a loop over ``os.environ.items()`` that builds
 the response -- discloses every secret the server process holds (cloud keys,
 tokens, database URLs), whatever the tool is nominally for. The dynamic child
-environment carries no decoy canary, so the live scan cannot see it; the rule keys on
+environment carries no canary, so the live scan cannot see it; the rule keys on
 the SOURCE SHAPE instead.
 
 The distinguishing feature is WHOLE vs. SINGLE:
