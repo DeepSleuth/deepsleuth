@@ -1,6 +1,6 @@
 """v6-W6 — the obfuscation signal for strings assembled from constants.
 
-``static-response-poisoning`` and the tool description poison families read string
+``static-response-poisoning`` and the description poison families read string
 LITERALS. A string assembled at runtime from integer constants --
 ``"".join(chr(c) for c in (73, 103, ...))``, ``chr(73) + chr(103) + ...``,
 ``bytes([...]).decode()``, a loop appending ``chr(c)`` for each ``c`` of a
