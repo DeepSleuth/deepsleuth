@@ -76,7 +76,7 @@ def _run(ctx: ScanContext) -> List[Finding]:
 
 register(Detector(
     id="const-string-assembly", category="prompt-injection", evidence_location="source",
-    phase="tool listing", run=_run, requires={CAP_SOURCE},
+    phase="listing", run=_run, requires={CAP_SOURCE},
     rationale=("A returned or compared string assembled from a chain of chr() calls on "
                "constants is hidden from every literal-based matcher; the assembly "
                "itself is the obfuscation, independent of what it spells."),
