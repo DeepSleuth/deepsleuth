@@ -93,7 +93,7 @@ def _run(ctx: ScanContext) -> List[Finding]:
 
 register(Detector(
     id="environ-dump", category="information-disclosure", evidence_location="source",
-    phase="tool listing", run=_run, requires={CAP_SOURCE},
+    phase="listing", run=_run, requires={CAP_SOURCE},
     rationale=("Serializing the whole process environment into a response discloses "
                "every secret the server holds; the shape (the mapping itself reaching "
                "a return, as opposed to one requested variable) is visible in source "
