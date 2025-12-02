@@ -13,7 +13,7 @@ a child process is clean (a consumer, not a disclosure).
 
 Grading (contract-vs-behavior, via the shared calibration layer):
 
-* the tool description DECLARES environment dumping (it names the environment /
+* the description DECLARES environment dumping (it names the environment /
   environment variables)  -> the declared-capability lane: low/low note, never
   a graded disclosure finding (v3-1.1 / rule P3.7: a declaration is recorded, it
   does not turn the shape into an attack -- and it is not allowed to discount
