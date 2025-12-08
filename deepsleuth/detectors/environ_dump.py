@@ -4,7 +4,7 @@ A tool whose body RETURNS the whole process environment (``str(dict(os.environ))
 ``json.dumps(dict(os.environ))``, an ``os.environ.items()`` loop that builds the
 response, ``printenv``) hands the agent -- and anyone the agent talks to --
 every secret the server process holds. The dynamic child environment carries no
-decoy canary, so no live scan can see it; this detector keys on the SOURCE SHAPE
+canary, so no live scan can see it; this detector keys on the SOURCE SHAPE
 (``analysis/envdump.py``) instead of canary luck.
 
 Whole vs. single is the whole rule: a tool returning ONE caller-requested
