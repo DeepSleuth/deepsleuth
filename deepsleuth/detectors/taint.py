@@ -38,7 +38,7 @@ _SEV_RANK = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 # the shell sink it structurally is.
 _ALWAYS_SHELL_CALLS = ("os.system", "os.popen")
 
-# rule P3.7 / v3-1.1 — a tool whose OWN tool description openly declares the exact
+# rule P3.7 / v3-1.1 — a tool whose OWN description openly declares the exact
 # dangerous capability a sink reaches (running a command / fetching a URL
 # the caller supplies) gets an ADDITIONAL, low-severity CAPABILITY note
 # (detection_method="declared-capability") recording that the capability is
