@@ -186,7 +186,7 @@ register(Detector(
     id="ast-taint",
     category="command-injection",
     evidence_location="source",
-    phase="tool listing",
+    phase="listing",
     run=_run,
     requires={CAP_SOURCE},
     rationale=(
