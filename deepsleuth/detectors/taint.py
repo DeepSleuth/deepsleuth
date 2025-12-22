@@ -174,7 +174,7 @@ def _run(ctx: ScanContext) -> List[Finding]:
                           "module": c.source.module_path},
                 source_kind="static-code", tool_name=c.name,
                 # v4-8 — ``raw.declared_capability`` tags the finding for
-                # the the gate/startup policy (``allow_declared_capabilities``);
+                # the gate/startup policy (``allow_declared_capabilities``);
                 # severity and confidence are unchanged.
                 raw={"source_to_sink": True,
                      "declared_capability": bool(declared_capability)},
