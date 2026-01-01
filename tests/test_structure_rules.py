@@ -3,7 +3,7 @@ descriptions/schemas (1.1-1.8).
 
 Two layers:
 1. Text-engine-level checks (1.3 authority-over-user, 1.4 self-as-
-   precondition, 1.5 order-free superlative, 1.7 long-tool description no longer
+   precondition, 1.5 order-free superlative, 1.7 long-description no longer
    scores) exercised directly through ``analyze_text``/``poisoning._grade``,
    the same way ``test_normalize.py`` covers the other families.
 2. Full fixture scans (1.1 cross-tool-redirect, 1.2 param-tampering, 1.6
