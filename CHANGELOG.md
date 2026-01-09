@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.4.0] — 2026-01-09
+
+sandbox scanner frontend.
+
+- batch/sandbox scanner: launch targets in a hardened Docker sandbox
+- deterministic call-plan driver with synthesized arguments + canaries
+- target loader: directory / mcp.json / raw launch command
+
 ## [0.3.1] — 2025-10-17
 
 fixes.

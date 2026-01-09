@@ -11,7 +11,7 @@ import subprocess
 import functools
 
 SCANNER_NAME = "deepsleuth"
-PINNED_VERSION = "0.3.1"
+PINNED_VERSION = "0.4.0"
 
 
 @functools.lru_cache(maxsize=1)
