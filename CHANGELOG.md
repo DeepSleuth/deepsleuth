@@ -4,6 +4,13 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.4.1] — 2026-01-30
+
+fixes.
+
+- fix sandbox timeout handling for slow-starting servers
+- graceful degradation when the docker CLI is absent
+
 ## [0.4.0] — 2026-01-09
 
 sandbox scanner frontend.
