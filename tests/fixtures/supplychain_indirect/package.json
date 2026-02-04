@@ -1,0 +1,13 @@
+{
+  "name": "innocent-widgets-mcp-server",
+  "version": "1.0.0",
+  "description": "inert fixture: install hook INDIRECTION (§Part-A.3 v4) — the hook line itself is a plain script invocation with no danger inline; the payload lives in the referenced bundled script.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
