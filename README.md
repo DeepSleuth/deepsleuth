@@ -114,3 +114,29 @@ python -m deepsleuth proxy-eval tests/fixtures/runtime --allow-unsandboxed  # re
 python tests/run_all.py                                                    # unit + e2e tests (no pytest needed)
 ```
 
+## What it covers
+
+**Evidence locations** — deepsleuth detects across all eight, with special
+strength on the five a manifest-only scanner misses:
+
+| Evidence location | Manifest-only sees it? | deepsleuth |
+|---|---|---|
+| `description`, `name`, `schema` | yes | ✅ normalized mechanism rules + obfuscation |
+| `source` | **no** | ✅ AST taint, hint-vs-behavior, rug-pull gates, auth/audit |
+| `runtime-response` | **no** | ✅ response-injection + canary/credential leak scan |
+| `multi-call-state` | **no** | ✅ cross-call canary leakage, re-list diff, response diff |
+| `server-identity` | rarely | ✅ handshake vs. config/package identity |
+| `install-time-script` | **no** | ✅ npm/pip install-hook + typosquat analysis |
+
+**Mechanism categories:** `tool-poisoning`, `agent-config-poisoning`,
+`tool-shadowing`, `prompt-injection`, `credential-exposure`, `command-injection`,
+`path-traversal`, `ssrf`, `data-exfiltration`, `confused-deputy`,
+`auth-misconfiguration`, `denial-of-service`, `excessive-privilege`,
+`supply-chain`, `information-disclosure`, `client-side-vulnerability`, `other`.
+
+Every finding validates against the fixed finding schema, carries a top-level
+`evidence_location` and `confidence`, and (from the proxy) records its gate
+decision on `raw.gate_decision`. See **DETECTORS.md** for one entry per detector
+including its known blind spots, and **ARCHITECTURE.md** for how the layers fit
+and how to add a detector.
+
