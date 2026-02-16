@@ -92,3 +92,15 @@ launching a second server. The same comparison also runs automatically across
 several entries in one `mcp.json` and across several server entry modules
 found in one directory.
 
+### Wire the proxy into an agent
+Point your MCP client at the proxy instead of the real server; the proxy launches
+the real one downstream:
+
+```jsonc
+{ "mcpServers": {
+    "guarded-fs": {
+      "command": "python", "args": ["-m", "deepsleuth", "proxy",
+        "/path/to/real-server", "--policy", "policy.example.yaml", "--log", "gate.jsonl"]
+    } } }
+```
+
