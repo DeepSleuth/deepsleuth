@@ -1,0 +1,31 @@
+# Example gate policy for the inline proxy (Frontend A).
+#
+# Deterministic, no LLM. Flat "key: value" YAML (this file) or JSON both work with
+# the built-in parser; PyYAML is only needed for nested files. Every key is
+# optional and shown here at its default value.
+
+# --- the gate (before every tools/call) ---
+block_high: true          # high/critical finding -> block (false -> confirm instead)
+confirm_low_medium: true  # low/medium -> confirm (pause + elicit) (false -> annotate)
+fail_closed: false        # unresolved confirm (no elicitation) -> block  (CLI: --fail-closed)
+remember_approvals: true  # an approved identical call is not re-prompted this session
+
+# --- startup tools/list audit (interposition point 1) ---
+withhold_threshold: high  # withhold a tool whose startup poisoning >= this severity
+annotate_poisoned: true   # annotate (vs. silently pass) sub-threshold poisoning
+
+# --- response scan (interposition point 3) ---
+response_block_threshold: high  # block a response with a finding >= this severity
+response_annotate: true         # annotate sub-threshold responses the agent will read
+
+# --- reporting ---
+min_report_severity: low  # findings below this are informational only
+
+# --- declared capabilities (v4-8) ---
+# An ast-taint finding whose tool openly DECLARES the capability its sink
+# reaches ("runs the shell command you give it", "fetches the URL you pass")
+# is tagged raw.declared_capability. It keeps its full severity/confidence in
+# the report. With this key on, the gate treats such a finding as confirm
+# instead of block, and the startup audit annotates the tool instead of
+# withholding it. Findings on undeclared capabilities are never affected.
+allow_declared_capabilities: false
