@@ -104,3 +104,13 @@ the real one downstream:
     } } }
 ```
 
+## Try it on the bundled fixtures
+
+```bash
+python -m deepsleuth scan tests/fixtures/injection --no-dynamic          # source taint + hint violation
+python -m deepsleuth scan tests/fixtures/poisoned  --no-dynamic          # poisoned descriptions
+python -m deepsleuth scan tests/fixtures/supplychain --no-dynamic        # install-time hook + typosquat
+python -m deepsleuth proxy-eval tests/fixtures/runtime --allow-unsandboxed  # response injection + cross-call leak, with gate decisions
+python tests/run_all.py                                                    # unit + e2e tests (no pytest needed)
+```
+
