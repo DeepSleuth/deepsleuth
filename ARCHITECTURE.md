@@ -144,3 +144,22 @@ can be scored offline. It launches the downstream in the Docker sandbox (benchma
 servers are untrusted) and, for scoring completeness, observes every response even
 when the live gate would have blocked pre-forward (the decision is still recorded).
 
+## Adding a detector
+
+1. Create `deepsleuth/detectors/<name>.py`.
+2. Write `def _run(ctx: ScanContext) -> List[Finding]:` — a **pure function**. Use
+   `analysis.textrules.analyze_text` for text mechanisms and `ctx.tool.source.facts`
+   for source behavior. Build findings with `detectors._util.mk(...)`.
+3. Prefer **full sensitivity + calibration** over an internal fire/don't-fire
+   threshold (v4): emit the finding whenever the *mechanism* is present (key on
+   the contract-vs-behavior mismatch — declared description/hints/schema vs.
+   implemented/observed behavior — not a raw verb or a raw `subprocess` call),
+   and let `calibration.py` decide `confidence` from contradiction/
+   corroboration. Reserve an outright non-fire for cases with genuinely zero
+   signal (e.g. no family match at all), not for "signal present but weak."
+4. `register(Detector(id=..., category=..., evidence_location=..., phase=...,
+   run=_run, requires={...}, rationale="why this mechanism is suspicious in
+   general"))`.
+5. Import the module in `detectors/__init__.py`. It now runs in **both** frontends.
+6. Add a unit test and a `DETECTORS.md` entry (with blind spots).
+
