@@ -163,3 +163,9 @@ when the live gate would have blocked pre-forward (the decision is still recorde
 5. Import the module in `detectors/__init__.py`. It now runs in **both** frontends.
 6. Add a unit test and a `DETECTORS.md` entry (with blind spots).
 
+## Determinism (hard constraint)
+
+No LLM, no randomness, no wall-clock in outputs. Canaries are hashed from
+`(tool, param, index)`, arguments are schema-derived, findings sort by a stable
+key, and JSON is emitted with sorted keys. Same input → identical bytes; verified
+by `tests/test_end_to_end.py::test_deterministic_output`.
