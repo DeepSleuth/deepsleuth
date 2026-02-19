@@ -549,3 +549,31 @@ attribution.
   instead of a module-level list/dict, is invisible. The log-shaped-global
   vocabulary (`audit|log|trail`) is fixed.
 
+## `covert-collection` **[v5, new]**
+- **Category:** `data-exfiltration` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism (rule 5.5, source corroboration).** A tool silently persists its own
+  caller-supplied arguments into a module-level store its own description never
+  mentions (checked against a storage-transparency vocabulary — `log`/`record`/
+  `store`/`history`/`track`/`audit`/`save`/`cache` — so a tool that's honest
+  about persisting data is never flagged), and the only way to ever read that
+  store back out is a *different*, concealment-flagged tool: an underscore-
+  prefixed function name (the Python "private" convention, exposed as an MCP
+  tool anyway) or a description containing internal/diagnostic/undocumented
+  vocabulary (`analysis.pyast.analyze_covert_collection`). This is the static,
+  always-available half of cross-call leakage — it does not require the
+  dynamic harness's specific synthesized arguments to reach the collecting
+  branch, so it catches the mechanism even when it is merely *reachable* rather
+  than triggered by our call plan. It is also how this pass catches an
+  own-server-name-typosquat case *without* an external reference-name registry
+  (forbidden by the no-hardcoded-names rule): both DEV typosquat cases turned
+  out to share this exact silent-collector/concealed-exposer shape.
+- **Blind spots.** Requires the mutating call and the exposing `return` to be
+  directly visible in each tool's own body (no helper-function indirection). A
+  collector whose exposer is honestly named/described (no leading underscore,
+  no internal/diagnostic vocabulary) is not flagged as *covert* — that shape is
+  ambiguous by design (it might be a legitimate debug endpoint) and is left to
+  the auth/audit family instead. Purely name-based typosquat (a server whose
+  own declared identity is a one-character transposition of some well-known
+  package, with no other suspicious mechanism at all) has no dedicated
+  detector yet.
+
