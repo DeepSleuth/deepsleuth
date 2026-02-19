@@ -529,3 +529,23 @@ attribution.
   shape is missed by this detector (though `covert-collection` below can still
   catch related silent-persistence shapes).
 
+## `audit-trail-ineffective` **[v5, new]**
+- **Category:** `auth-misconfiguration` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism (rule 5.9, widened).** `auth-gap`/`audit-gap` above only ever fire on
+  an *English* promise in the description ("logs are recorded", ...) — but a
+  server that exposes a dedicated "read the audit trail" tool has, by that
+  structural act alone, declared it maintains one; no prose is required for the
+  contradiction to be real. `analysis.pyast.analyze_audit_trail` finds a
+  log/audit/trail-shaped module global that some tool exposes (returns) without
+  itself writing to it, then checks every *destructive* tool in the same module
+  against it: contributes **nothing** at all (`kind=no_log`) or contributes only
+  a **hard-coded literal** with no trace of the actual action taken
+  (`kind=generic_log`, detected by checking whether the appended value's AST
+  contains any `Name`/`FormattedValue` node at all — zero means it can never
+  reflect what happened). A tool that logs real, dynamic details of its own
+  action (an f-string over its own parameters/results) is not flagged.
+- **Blind spots.** Same single-hop limitation as `session-reuse`: an append
+  reached through a helper function, or a log implemented as a class/file
+  instead of a module-level list/dict, is invisible. The log-shaped-global
+  vocabulary (`audit|log|trail`) is fixed.
+
