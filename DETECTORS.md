@@ -503,3 +503,29 @@ attribution.
   ineffective` now fires on this shape too, unconditional in calibration like the
   rest of this detector.
 
+## `session-reuse` **[v5, new]**
+- **Category:** `confused-deputy` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism (rules 5.9/P5.2).** A distinct static shape from `auth-control-
+  ineffective`: there is no auth-shaped check to be ineffective at all — a tool
+  takes a session/token/ticket-shaped identifier (vocabulary-matched, not a
+  hardcoded name: `session_id`, `auth_token`, `ticket_id`, …), uses it as the
+  *sole* key into a module-level store another tool populates per-caller, and
+  returns data from the looked-up record with **no comparison** of any of that
+  record's own fields against any other supplied parameter
+  (`analysis.pyast.analyze_session_reuse`). Possessing the identifier is treated
+  as sufficient proof of ownership, so a guessed, observed, or merely
+  intercepted identifier issued to one caller discloses another caller's data —
+  independent of whether the identifier itself is guessable (an incrementing
+  int) or looks random (`secrets.token_hex`); randomness of the *token* is
+  irrelevant if nothing ever checks who is presenting it. The honest
+  counterpart (an extra "binding token" that must `==` a field on the looked-up
+  record) is exactly what removes the finding — a real comparison proves
+  ownership actually gets verified.
+- **Blind spots.** Single-hop: the lookup must be a direct `STORE.get(param)`/
+  `STORE[param]` pattern; a lookup reached through a helper function or a
+  class-based store is not followed. The identifier vocabulary is a fixed list
+  (`user|account|session|customer|owner|client` × `id|name`, plus `username`/
+  `email`/bare `token`) — a differently-named identifier parameter in the same
+  shape is missed by this detector (though `covert-collection` below can still
+  catch related silent-persistence shapes).
+
