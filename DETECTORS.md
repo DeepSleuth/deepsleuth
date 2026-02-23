@@ -577,3 +577,13 @@ attribution.
   package, with no other suspicious mechanism at all) has no dedicated
   detector yet.
 
+## Detector hardening: phases 0–4
+Phase 0 (bug
+fixes) and Phase 1 (description/schema structure rules) landed first; this
+section documents Phase 2 (static engine), Phase 3 (dynamic engine) and
+Phase 4 (identity/breadth), which is where most of the *new* detector ids
+below come from. Every rule here ships with a benign-twin fixture under
+`tests/fixtures/` (see `tests/test_structure_rules.py`, `test_phase2_static.py`,
+`test_phase3.py`, `test_phase4.py`, `test_pinning.py`) — fires on the
+malicious shape, stays clean on a shape-matched honest twin.
+
