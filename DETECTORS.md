@@ -612,3 +612,15 @@ malicious shape, stays clean on a shape-matched honest twin.
   the weaker quoted-name mode). A tamper/redirect instruction phrased with
   none of the closed verb vocabularies at all is still a miss.
 
+### `out-of-scope-param` **[Phase 1.6]**
+- **Category:** `data-exfiltration` · **Evidence:** `schema` · **Phase:** listing
+- **Mechanism.** A schema parameter whose name/description asks the CALLER
+  for information about its own context (the invoking model's name/identity,
+  its system prompt, its conversation history, its own tool list) —
+  backwards for a tool, which takes domain inputs, not caller-identity
+  harvesting fields. Raised to `high` when `BehaviorFacts.unused_params`
+  (Python source) shows the parameter is never referenced in the function
+  body at all — the MSB `out_of_scope_parameter` shape exactly.
+- **Blind spots.** Vocabulary-gated (model/prompt/conversation/tool-list
+  words); a harvesting field phrased with none of them is missed.
+
