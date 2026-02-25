@@ -587,3 +587,28 @@ below come from. Every rule here ships with a benign-twin fixture under
 `test_phase3.py`, `test_phase4.py`, `test_pinning.py`) — fires on the
 malicious shape, stays clean on a shape-matched honest twin.
 
+### `cross-tool-redirect` / `param-tampering` **[Phase 1.1/1.2]**
+- **Category:** `confused-deputy` · **Evidence:** `description` (or `source`
+  for the response-side twin, see `response-redirect` below) · **Phase:** listing
+- **Mechanism.** A tool's description has no legitimate authority over a
+  *different* tool. `cross-tool-redirect` fires when one sentence names a
+  sibling tool from this same listing (`ctx.tools` — never a hardcoded
+  registry) plus an obligation/sequence word (must/always/before/after/
+  when/first) plus an invoke verb (call/use/run/execute); `param-tampering`
+  is the same sentence-with-a-sibling-name test with a tamper verb
+  (modify/change/set/replace/append/redirect) plus an argument word or a
+  quoted literal. A **quoted-name mode** additionally fires when the named
+  victim is NOT a co-listed sibling at all — any quoted/backticked
+  identifier-shaped token following the same obligation+invoke (or
+  tamper+argument) shape, at `confidence: medium` since it can't be
+  cross-checked against the live listing (`detectors/crosstool.py`).
+- **Precision gate.** Short/common English words (`get`, `list`, `run`, …)
+  are never read as a sibling name (`_COMMON_WORDS`); a documented, blanket
+  "call X before using any OTHER tool" session-bootstrap idiom is carved out
+  (`_SAFE_PRECONDITION_RX`) — matches devset's genuine two-tool honest
+  servers.
+- **Blind spots.** Needs the sibling list to be visible (a single-tool scan,
+  or a tool poisoned in isolation outside its server's listing, can only use
+  the weaker quoted-name mode). A tamper/redirect instruction phrased with
+  none of the closed verb vocabularies at all is still a miss.
+
