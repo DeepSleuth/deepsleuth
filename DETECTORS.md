@@ -624,3 +624,16 @@ malicious shape, stays clean on a shape-matched honest twin.
 - **Blind spots.** Vocabulary-gated (model/prompt/conversation/tool-list
   words); a harvesting field phrased with none of them is missed.
 
+### `static-response-poisoning` **[Phase 2.1]**
+- **Category:** `tool-poisoning` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism.** `analysis/pyast.py` statically resolves every string a tool
+  function `return`s (literal / f-string literal wrapper / module constant /
+  `+` concatenation), then scans them with the **same** response rules
+  `response-injection` uses at runtime — a hard-coded redirect/injection
+  baked into a tool's own source is visible without ever calling it. This is
+  what makes MSB's `tool_transfer` (`<IMPORTANT>` redirect baked into every
+  response) catchable in a static-only scan.
+- **Blind spots.** Only literal/const-resolvable strings; a payload built
+  from runtime data (a request id, a timestamp) at return time is invisible
+  here (the dynamic `response-injection` pass covers it once actually called).
+
