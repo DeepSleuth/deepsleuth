@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deepsleuth"
-version = "0.4.1"
+version = "0.4.0"
 description = "Deepsleuth — read the fine print. Deterministic deep-visibility security scanner for MCP servers (no LLM)."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -16,6 +16,10 @@ license-files = ["LICENSE*"]
 # the `docker` CLI (not a Python package). YAML policy files are supported via a
 # built-in flat parser; PyYAML is optional and only enables nested policy files.
 dependencies = []
+
+[project.optional-dependencies]
+# Optional: richer (nested) YAML policy files. JSON and flat YAML work without it.
+yaml = ["PyYAML==6.0.2"]
 
 [project.urls]
 Homepage = "https://github.com/DeepSleuth/deepsleuth"
