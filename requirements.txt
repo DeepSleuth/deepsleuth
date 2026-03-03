@@ -1,0 +1,9 @@
+# deepsleuth has NO required third-party runtime dependencies.
+# It speaks MCP over stdio itself (deepsleuth/mcpclient), so it installs and runs
+# in externally-managed (PEP 668) environments, offline and deterministically.
+# Python 3.11+ and (for the dynamic sandbox layer) the Docker CLI are the only
+# external requirements.
+#
+# Optional extras (uncomment if you want them):
+# PyYAML==6.0.2      # nested YAML policy files (flat YAML + JSON work without it)
+# mcp<2              # speak MCP via the official SDK instead of the built-in client
