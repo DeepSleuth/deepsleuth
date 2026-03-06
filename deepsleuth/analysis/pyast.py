@@ -514,7 +514,7 @@ class ToolDef:
     # and the description, as a JSON-shaped literal (``title=``,
     # ``annotations={...}`` / ``ToolAnnotations(...)``, ``inputSchema={...}``,
     # ``outputSchema=``, ``meta=``, ...): the static twin of the live
-    # tool listing entry, so the description rules read every string a listing
+    # listing entry, so the description rules read every string a listing
     # would carry even when the server is never launched.
     listing_entry: Dict[str, Any] = field(default_factory=dict)
 
