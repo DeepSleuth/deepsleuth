@@ -16,7 +16,7 @@ Provides three things the manifest-only scanners cannot see:
    opens sockets, spawns processes, mutates module state), plus rug-pull gates
    (call-counter / wall-clock / env-flag control flow) and auth/audit presence.
 
-All approximate but conservative for recall; the *precision* the gate lives in the
+All approximate but conservative for recall; the *precision* gate lives in the
 detectors, which compare these facts against the tool's declared contract.
 """
 from __future__ import annotations
