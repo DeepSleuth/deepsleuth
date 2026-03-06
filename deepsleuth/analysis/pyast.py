@@ -4,7 +4,7 @@ Provides three things the manifest-only scanners cannot see:
 
 1. **Tool extraction** — find functions registered as MCP tools (decorator based:
    ``@mcp.tool()``, ``@server.tool``, ``@app.resource``, ``@x.prompt`` …), and read
-   their *declared contract*: name, tool description, and annotation hints
+   their *declared contract*: name, description, and annotation hints
    (readOnlyHint / destructiveHint / idempotentHint / openWorldHint).
 
 2. **Intra-procedural taint** — tool parameters are tainted sources; taint
