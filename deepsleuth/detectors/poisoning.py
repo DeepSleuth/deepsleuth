@@ -1,7 +1,7 @@
 """rule 5.1 — poisoned descriptions / instructions-in-metadata, and obfuscation.
 
 Runs the normalized mechanism rule engine (analysis.textrules) over every tool /
-resource / prompt tool description, over each schema-field description, and over names.
+resource / prompt description, over each schema-field description, and over names.
 Fires on the *mechanism* (agent-directed imperatives, concealment, exfiltration,
 preference steering, gratuitous secret references) — not on any fixed phrase — and
 separately flags *obfuscation* (zero-width/bidi/homoglyph/encoded/comment) as a
