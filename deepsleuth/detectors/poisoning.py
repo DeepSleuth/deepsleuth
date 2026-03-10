@@ -165,7 +165,7 @@ def _analyze_contract_text(ctx: ScanContext, c: ToolContract) -> List[Finding]:
                     source_kind=kind, tool_name=c.name,
                 ))
 
-    # 3b) v5-6 — every OTHER string of the live tool listing entry: annotations,
+    # 3b) v5-6 — every OTHER string of the live listing entry: annotations,
     # titles, examples, output-schema descriptions, enum descriptions,
     # vendor/extension fields, nested input-schema descriptions, at any
     # depth. A standard description slot (a ``description`` inside the input
