@@ -106,7 +106,7 @@ register(Detector(
     id="static-response-poisoning",
     category="prompt-injection",
     evidence_location="source",
-    phase="tool listing",
+    phase="listing",
     run=_run,
     requires={CAP_SOURCE},
     rationale=(
