@@ -2,7 +2,7 @@
 
 The brief suggests the official ``mcp`` SDK, but many host environments are
 externally-managed (PEP 668) and cannot pip-install it. To stay runnable and fully
-fully deterministic everywhere, we speak the protocol directly: newline-delimited UTF-8
+deterministic everywhere, we speak the protocol directly: newline-delimited UTF-8
 JSON-RPC 2.0 messages over the child's stdin/stdout, exactly as the MCP stdio
 transport specifies. This is used by Frontend B (batch dynamic layer) and by the
 downstream leg of Frontend A (the proxy)."""
