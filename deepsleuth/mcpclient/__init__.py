@@ -130,7 +130,7 @@ class StdioClient:
                             timeout=timeout)
 
     # rule 3.4 — resources and prompts are LISTED by the base plan but never
-    # READ; a credential resource sitting right next to the tool tool listing is
+    # READ; a credential resource sitting right next to the tool listing is
     # invisible to every response rule unless something actually fetches its
     # content. Both mirror ``call_tool``'s timeout/error shape so a caller
     # can reuse ``sandbox.argsynth.flatten_result`` on the result unchanged.
