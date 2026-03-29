@@ -248,7 +248,7 @@ def spawn(launch: SandboxLaunch, target: Target) -> subprocess.Popen:
         env = launch.env
     cwd = target.root_dir if (launch.mode == "unsandboxed" and target.root_dir) else None
     # stderr -> DEVNULL to avoid a full-pipe deadlock while we drive stdio;
-    # server logs are not part of the fully deterministic finding set.
+    # server logs are not part of the deterministic finding set.
     return subprocess.Popen(
         launch.argv,
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
