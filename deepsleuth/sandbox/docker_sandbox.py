@@ -5,7 +5,7 @@ stdio so the MCP client can drive it:
 
 * non-root user, read-only root filesystem,
 * ``--network none`` (outbound is off; any exfil attempt fails — the intent is
-  still caught statically and via decoy canary URLs),
+  still caught statically and via canary URLs),
 * writable ``tmpfs`` seeded with decoy secret files at sensitive paths so a tool
   that reads them is caught when the decoy marker surfaces in a response,
 * CPU / memory / pids / time limits; hard kill on timeout (a DoS signal).
