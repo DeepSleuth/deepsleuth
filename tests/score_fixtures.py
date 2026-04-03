@@ -57,7 +57,7 @@ def _response_ctx(fixture, calls):
     mod = _load_mod(fixture)
     ctx = ScanContext(target=Target(target_id=fixture))
     ctx.tools = [
-        ToolContract(name=t["name"], tool description=t["description"],
+        ToolContract(name=t["name"], description=t["description"],
                      input_schema=t.get("inputSchema", {}),
                      hints=dict(t.get("annotations", {}) or {}))
         for t in mod.mcp._tools
