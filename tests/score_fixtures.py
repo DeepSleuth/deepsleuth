@@ -144,7 +144,7 @@ def score_multicall():
         ctx.calls = calls
         return [f for f in run_phase(ctx, "response") if f.severity != "none"]
 
-    decoy canary = CANARIES.secret("token", "store_secret", "api_key")
+    canary = CANARIES.secret("token", "store_secret", "api_key")
     rows.append(("crosscall/token-leak", True, ctx_for([
         CallRecord(seq=0, tool_name="store_secret", arguments={"api_key": canary},
                    response_text="stored ok"),
