@@ -4,7 +4,7 @@ These exercise the dynamic-layer cross-call leak detector directly against a
 hand-built ``ScanContext`` (exactly like ``test_response_detectors.py``), so no
 Docker/live server is needed, and prove the fix for the case-sensitivity bug in
 ``CanaryFactory.is_canary`` that silently made every token/api_key-shaped
-decoy canary invisible to cross-call leak detection (Part-A.1 recall regression):
+canary invisible to cross-call leak detection (Part-A.1 recall regression):
 ``CanaryFactory.secret("token", ...)`` deliberately lowercases the
 ``MCPSCANCANARY`` prefix to look like a realistic API token/secret shape, but
 ``is_canary`` was doing a case-*sensitive* substring check — so a value planted
