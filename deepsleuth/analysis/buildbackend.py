@@ -232,5 +232,3 @@ def backend_module_candidates(manifest_dir: str, backend: str, backend_path: Lis
         out.append(os.path.join(base, rel + ".py"))
         out.append(os.path.join(base, rel, "__init__.py"))
     return out
-
-# TODO: revisit before 1.0
