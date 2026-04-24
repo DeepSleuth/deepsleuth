@@ -4,6 +4,15 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.5.0] — 2026-04-24
+
+inline gateway + calibration.
+
+- transparent stdio MCP proxy with a pre-call gate
+- shared additive calibration layer (severity/confidence split)
+- server-identity pinning across sessions
+- response-injection, response-leak and auth-gap detectors
+
 ## [0.4.1] — 2026-01-30
 
 fixes.
