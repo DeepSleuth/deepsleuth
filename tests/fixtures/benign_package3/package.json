@@ -1,0 +1,13 @@
+{
+  "name": "native-addon-server",
+  "version": "0.9.0",
+  "description": "inert fixture: chmod on a freshly-built local binary + a trivial inline logger (§V3-2 FP generalization check)",
+  "main": "index.js",
+  "scripts": {
+    "build": "gcc -o build/tool src/main.c && chmod +x build/tool",
+    "postinstall": "node -e \"console.log('setup complete')\""
+  },
+  "dependencies": {
+    "express": "^4.18.0"
+  }
+}
