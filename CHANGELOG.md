@@ -4,6 +4,12 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.5.1] — 2026-05-08
+
+fixes.
+
+- fix pin migration when a tool's schema changes legitimately
+
 ## [0.5.0] — 2026-04-24
 
 inline gateway + calibration.
