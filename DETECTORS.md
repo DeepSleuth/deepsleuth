@@ -637,3 +637,19 @@ malicious shape, stays clean on a shape-matched honest twin.
   from runtime data (a request id, a timestamp) at return time is invisible
   here (the dynamic `response-injection` pass covers it once actually called).
 
+### `hint-violation` widened **[Phase 2.4]**
+Three new contradictions added to the existing readOnly/destructive check
+(`detectors/privilege.py`):
+- **`idempotentHint: true` vs. accumulation.** `BehaviorFacts.accumulates_state`
+  — an in-place `+=`/`-=` on module state, or a collection grown via
+  `append`/`extend`/`insert`/`add` — is the literal negation of what
+  idempotentHint asserts (repeating the same call must NOT change the
+  result again). `severity: high`.
+- **`destructiveHint: false` widened past file-deletion** to any
+  domain-state overwrite (`mutates-server-state`), not just `deletes-files`
+  — a "refresh cache" tool that silently overwrites the real record it
+  claims only to refresh a *view* of is exactly as destructive as deleting
+  it.
+- **`openWorldHint: false` vs. a network call** — a closed-universe claim
+  directly contradicted by any recognized network sink.
+
