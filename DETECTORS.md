@@ -653,3 +653,14 @@ Three new contradictions added to the existing readOnly/destructive check
 - **`openWorldHint: false` vs. a network call** — a closed-universe claim
   directly contradicted by any recognized network sink.
 
+### `scope-creep`: bookkeeping vs. domain-visible mutation **[Phase 2.5]**
+`privilege.py` computes, once per scan, every module-global that **some**
+tool in the server actually `return`s (`analysis.pyast.collect_exposed_
+state_globals`). A read-shaped tool whose only mutation touches a global no
+tool ever exposes (a private call counter, an internal cache) is bookkeeping
+— it contradicts nothing a caller can ever observe through this server's
+declared tools — and is no longer flagged. A read-shaped tool that mutates a
+global *another tool does return* still fires (the caller-observable
+contradiction the rule exists to catch). Fixtures: `scope_creep_bookkeeping_
+benign` (clean) vs. `scope_creep_domain_mutation` (fires).
+
