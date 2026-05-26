@@ -664,3 +664,17 @@ global *another tool does return* still fires (the caller-observable
 contradiction the rule exists to catch). Fixtures: `scope_creep_bookkeeping_
 benign` (clean) vs. `scope_creep_domain_mutation` (fires).
 
+### `runtime-metadata-mutation` **[Phase 2.2, new]**
+- **Category:** `tool-poisoning` · **Evidence:** `source` · **Phase:** listing
+- **Mechanism.** A runtime assignment to a function's `__doc__` (any
+  object — MCP SDKs commonly source a tool's live description straight from
+  it) or to a tool-registry-shaped `.description`/`.instructions`/
+  `.annotations` attribute (root object token-matched against
+  tool/registry/handler/server/mcp/self/…, so an unrelated domain object's
+  own honest `.description` field is never misread). Raised to `high` when
+  it sits behind the same call-counter/time/env gate `rugpull-source`
+  already flags — the "passes inspection, changes later" shape
+  (MCPSecBench's `get_weather_forecast`).
+- **Blind spots.** Only a direct `Assign`/`AugAssign` onto the attribute;
+  reflection (`setattr(fn, "__doc__", ...)`) is not modeled.
+
