@@ -678,3 +678,13 @@ benign` (clean) vs. `scope_creep_domain_mutation` (fires).
 - **Blind spots.** Only a direct `Assign`/`AugAssign` onto the attribute;
   reflection (`setattr(fn, "__doc__", ...)`) is not modeled.
 
+### `rugpull-source` — counter gate through a persisted/aliased state **[Phase 2.3]**
+The call-counter-gate check now recognizes a counter reached one
+indirection further: a local variable that **aliases** module state
+(`record = _STATE.get(k)`) or that was read from **persisted** state (a
+file/JSON blob: `count = int(open(path).read())`), then compared directly
+against a bare numeric literal — the MCPSecBench weather-tool shape ("the
+counter is a local read from a state file"). A local variable doing an
+ordinary string-containment check on the same kind of file read (no numeric
+literal, no gate shape) still stays clean.
+
