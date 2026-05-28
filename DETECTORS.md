@@ -688,3 +688,28 @@ counter is a local read from a state file"). A local variable doing an
 ordinary string-containment check on the same kind of file read (no numeric
 literal, no gate shape) still stays clean.
 
+### `ast-taint` — one level of call inlining + sanitizer modeling **[Phase 2.6]**
+- **Call inlining.** A bare-name call to a **local module-level helper**
+  function, with a tainted argument, is analyzed as its own taint problem
+  (the helper's own parameters seeded as sources only for the ones that
+  actually received a tainted argument); any sink the helper reaches is
+  folded back into the caller's findings (`evidence.via_helper` names the
+  helper). Capped at one level — the helper's own analyzer gets an empty
+  `module_functions` map, so it never itself inlines a second hop.
+- **Sanitizer modeling.** Two recognized shapes downgrade a sink to
+  `severity: low, confidence: low` instead of reporting it identically to an
+  unguarded path: (1) a value that passed through `os.path.basename`/
+  `shlex.quote` (fully sanitizing on their own); (2) a value normalized with
+  `realpath`/`normpath`/`abspath`/`.resolve()` **and** checked anywhere in
+  the function against a fixed prefix (`.startswith`/`.is_relative_to`/
+  `os.path.commonpath`) or an allow-list (`x in ALLOWED`/`x not in ALLOWED`
+  against a literal collection or a module constant). Normalization *alone*,
+  with no guard anywhere, stays at full severity — proven by the paired
+  `taint_sanitized_path` (guarded, low) / `taint_sanitized_path_unguarded`
+  (unguarded, full severity) fixtures.
+- **Blind spots.** One level of inlining only — a two-hop helper chain is
+  not followed. The sanitizer guard is checked "anywhere in the function",
+  not proven control-flow-adjacent to the sink (same lenient shape as the
+  counter-gate check) — a guard that exists but doesn't actually dominate
+  the sink path could still (rarely) suppress a real finding.
+
