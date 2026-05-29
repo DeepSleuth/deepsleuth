@@ -713,3 +713,29 @@ literal, no gate shape) still stays clean.
   counter-gate check) — a guard that exists but doesn't actually dominate
   the sink path could still (rarely) suppress a real finding.
 
+### Tool extraction without a per-tool decorator **[Phase 2.7]**
+`analysis/pyast.extract_tools_all` (used by `context.build_source_facts`)
+adds three registration shapes `extract_tools` alone never saw:
+1. **Functional registration** — `mcp.add_tool(fn)` / `server.register_tool(fn, ...)`
+   / `mcp.tool()(fn)` (a decorator called and applied to an
+   already-defined function instead of written with `@`).
+2. **Low-level SDK, `list_tools`** — every `Tool(name=..., description=...,
+   inputSchema=...)` construction (or equivalent `{"name":..., "description":...}`
+   dict literal) reachable inside an `@server.list_tools()` handler.
+3. **Low-level SDK, `call_tool`** — a dict-dispatch table
+   (`{"name": handler_fn, ...}`) or an `if name == "x": ... elif name ==
+   "y": ...` literal-comparison chain inside `@server.call_tool()`, bound to
+   a **real** implementation (the referenced function itself, or a synthetic
+   wrapper around just the matching arm) so taint/hint-violation/etc. run on
+   it exactly as for a decorated tool.
+A `list_tools` description and a `call_tool` behavior for the SAME name are
+merged into one `SourceFacts` entry, keyed by the live tool name — so both
+static-only and dynamic (name-bound) scans see it. `_decorator_kind` also
+now excludes the SDK's own reserved hook names (`list_tools`/`call_tool`/
+`list_resources`/`read_resource`/`list_prompts`/`get_prompt`, …) from the
+per-tool decorator matcher — without this, `call_tool` (ends with `_tool`)
+was itself misread as a tool named "call_tool".
+- **Blind spots.** Module-level only (a helper registered from inside a
+  class method or a nested function is not found). The if/elif dispatch
+  reader only looks at the handler's first top-level `if` statement.
+
