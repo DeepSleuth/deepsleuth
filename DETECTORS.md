@@ -758,3 +758,84 @@ changes at all to consume them.
   no cross-file/`require`d-helper taint; TypeScript type annotations are
   ignored (harmless — they don't affect the value-flow this looks for).
 
+### Phase 3 — deepening the dynamic engine
+- **Call plan: harvested candidate values + widened enum/path variants
+  (3.2/3.3, `sandbox/argsynth.py: _extra_variant_calls`).** A small, CAPPED
+  tail of extra calls appended after the burst+pass phases: (a) string
+  literals a tool's own source compares a parameter against, or uses as a
+  dict-lookup key (`analysis.pyast._harvest_candidate_values`,
+  `BehaviorFacts.candidate_values`) — reaches branches a fixed canary can
+  never trigger (MCPSecBench's `get_user_info` only poisons its response for
+  a real-looking username); (b) every remaining schema `enum` value beyond
+  the first; (c) relative/`../` path-traversal variants for path-hinted
+  string parameters. Capped per tool so a large candidate/enum set can't
+  blow up the plan.
+- **Resources and prompts are now READ, not just listed (3.4,
+  `mcpclient.StdioClient.read_resource`/`get_prompt`, wired in
+  `scanner._run_dynamic`).** Every listed resource/prompt is fetched once
+  after the main call loop and appended to `ctx.calls` as a synthetic call
+  record (`tool_name="resource:<name>"`/`"prompt:<name>"`), so the SAME
+  response detectors (`response-injection`, `response-leak`,
+  `response-oversharing`) scan the content with zero new detector code —
+  MCPSecBench's "two credential resources, listed and never read" gap.
+- **`response-redirect` (3.5, new detector, `detectors/response.py`).**
+  "call X" inside a tool RESPONSE (not just a description), where X is not
+  a tool this server itself declares — fires with no secret-word required,
+  a separate mechanism from the existing secret-word-gated
+  `_clause_scoped_tool_redirect` inside `response-injection`. A response
+  naming one of this server's own tools (an honest "see also
+  refresh_token") is excluded by construction.
+- **Value-shape over-sharing checks (3.6, `response._value_shape_hits`).**
+  National-ID-shaped (`\d{3}-\d{2}-\d{4}`), Luhn-checksum-validated card
+  number, phone number, internal hostname (`*.internal`/`*.corp`/…),
+  private IP (RFC1918), and `build NNNN`-shaped values — any ONE is enough
+  on its own (no second unrelated label required) as long as the
+  description's own vocabulary doesn't already imply that kind of data. A
+  validated card number raises `response-oversharing` to `severity: high`.
+- **Leaks graded by canary kind + surfacing tool's purpose (3.7,
+  `response._run_leak`).** A `secret`-kind canary (planted into a
+  credential-shaped parameter) surfacing elsewhere stays `high/high`
+  everywhere. A plain `arg`-kind canary surfacing through a tool that
+  itself declares an audit/log/history/trail purpose
+  (`response._is_audit_tool`, name or description token-matched) is
+  downgraded to an informational `low/medium` note — that is the tool's
+  intended behavior, not a leak (`transfer_funds_logged`'s account id
+  showing up in `get_audit_log`).
+- **Idempotent-declared tools compared with numbers kept (3.8,
+  `rugpull._run_runtime`).** The existing repeated-identical-call response
+  diff strips volatile tokens INCLUDING every number before comparing,
+  which silently equates a credits balance of 15 and 20. For a tool
+  declaring `idempotentHint: true`, an additional raw-text (numbers-kept)
+  comparison fires `hint-violation`/`high`/`high` when two identical calls'
+  responses differ at all — `detection_method:
+  "idempotent-response-diff"`, verified live end-to-end against a real
+  Docker-launched server (`tests/fixtures/idempotent_accumulation`,
+  `tests/test_phase3.py`).
+- **Retrieval tools as untrusted-content carriers (3.9,
+  `response._is_retrieval_tool`, `_run_injection`).** A tool whose name
+  reads as fetch/read/search/retrieve/browse (or "get mail"/"get email")
+  is structurally likely to hand back THIRD-PARTY content (a README, an
+  email body, API documentation), not the server's own authored words. Its
+  response is still scanned, but a fired instruction-like mechanism is
+  **annotated** (`severity: low`, `detection_method:
+  "untrusted-content-annotation"`) instead of blocked, UNLESS the text does
+  what honest retrieved content essentially never does: address the agent
+  with a specific tool call to make (`next_action_redirect`) or ask for
+  concealment (`concealment`) — those two stay full-severity on every tool,
+  retrieval-shaped or not.
+- **Generic over-sharing heuristic demoted, specific evidence kept full
+  strength (3.10, `response._scope_oversharing`).** A response over-sharing
+  finding resting SOLELY on a bare unpromised record list (no
+  field-vocabulary mismatch, no rule 3.6 value-shape hit) is graded
+  `confidence: low` — real, but too easily true of an honestly terse
+  description. A field-vocabulary mismatch (named unrelated fields/labels)
+  or any value-shape hit keeps full `medium`+ confidence — this is
+  deliberately narrower than the guide's literal "record list, unrelated
+  field names" phrasing, scoped to the record-list half only, because
+  demoting the field-vocabulary-mismatch reason too was measured to
+  regress `devset/score_dev.py`'s own labeled over-sharing cases (which
+  rest on exactly that reason) from 100% to 91% dynamic recall with no
+  offsetting precision gain on data this repo can measure — devset
+  recall was kept as the deciding signal per the guide's own "iterate with
+  score_dev.py" working rule.
+
