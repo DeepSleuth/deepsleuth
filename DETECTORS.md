@@ -739,3 +739,22 @@ was itself misread as a tool named "call_tool".
   class method or a nested function is not found). The if/elif dispatch
   reader only looks at the handler's first top-level `if` statement.
 
+### JavaScript/TypeScript source extraction **[Phase 2.8, new — `analysis/jsast.py`]**
+No JS/TS parser dependency (deliberately, to stay dependency-free): a
+balanced-paren/brace text scan recovers (1) every tool's declared
+name+description from the high-level SDK's `server.tool(name, [desc],
+[schema], handler)` / `server.registerTool(name, {description, ...},
+handler)` calls and the low-level SDK's `{name, description}` object-literal
+array shape, feeding the **same** text-engine description rules Python
+sources already get (`desc-poisoning` fires on a JS-sourced tool exactly as
+on a Python one — zero extra detector code); and (2) `child_process`/`eval`/
+`fetch`/`fs` sinks inside a registration call's body, tainted when the
+sink's own argument text references one of the handler's declared parameter
+names — the JS/TS analogue of `ast-taint`, reusing the same
+`SinkRecord`/`BehaviorFacts` shapes so `detectors/taint.py` needed no
+changes at all to consume them.
+- **Blind spots.** Regex/brace-matching, not a real parser: destructuring/
+  parameter extraction is best-effort and can over- or under-approximate;
+  no cross-file/`require`d-helper taint; TypeScript type annotations are
+  ignored (harmless — they don't affect the value-flow this looks for).
+
