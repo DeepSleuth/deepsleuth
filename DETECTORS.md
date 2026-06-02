@@ -839,3 +839,36 @@ changes at all to consume them.
   recall was kept as the deciding signal per the guide's own "iterate with
   score_dev.py" working rule.
 
+### Phase 4 — identity and breadth
+- **`cross-server-name-overlap` (4.1, new — `detectors/crossserver.py`,
+  `analysis/editdist.py`; severity split in rule P6.9, see the "Priorities 2–6.9"
+  section above for the full mechanism).** Compares every tool name across
+  every server in one `mcp.json`/multi-target scan: normalizes (lowercase,
+  strip common version-ish suffixes like `_v1`/`-beta`), then flags an exact
+  name (LOW, informational — rule P6.9), a suffix-stripped match corroborated by a
+  near-identical description (HIGH — rule P6.9), or a character-level near-miss
+  (Damerau-Levenshtein ≤ 2, transpositions counted as one edit, MEDIUM) on a
+  **different** server — MSB's `name_overlap` shape (a renamed `_v1` clone
+  serving a poisoned response template from outside the scanned folder).
+  Needs ≥2 targets scanned together; a single-server scan is a no-op.
+- **Server pinning (4.2, new — `pinning.py`, proxy-only, `server-pin-
+  changed`/`server-identity-collision` findings).** Persists a hash of each
+  configured server's handshake identity + live tool-name set across
+  proxy sessions (`check_and_update_pin`, keyed by the target id). First
+  sighting establishes the pin silently; a later session with a changed
+  identity/tool-set on the SAME key, or two *different* keys sharing the
+  same handshake identity, fires — the shadow-server case (same advertised
+  name as a sanctioned server) is caught by identity for the first time,
+  rather than only incidentally through unrelated behavior findings.
+- **Typosquat widened (4.3, `detectors/supply_chain.py`).** Damerau-
+  Levenshtein (adjacent transpositions count as ONE edit, not two) replaces
+  plain Levenshtein, and the check now also compares a dependency name
+  against the SERVER'S OWN declared name (`_own_name_typosquat`) — not just
+  the fixed popular-package seed list.
+- **Non-English coverage note (4.4, `normalize.is_probably_non_english`,
+  `detectors/poisoning._run`).** A description in a non-Latin/majority
+  non-English script is neither silently passed nor flagged as poisoned —
+  it appends a plain-text "reduced text-rule coverage" note to `ctx.skipped`
+  (not a `Finding`, so it never counts as a detection and never affects the
+  gate), so a report is honest about reduced coverage instead of guessing.
+
