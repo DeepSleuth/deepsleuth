@@ -1062,3 +1062,18 @@ restore, not something the labeled DEV set could see.
     suffix relationship at all and falls through to the plain exact-name-share
     or near-miss paths instead.
 
+## Argument-synthesis fix: identity-shaped parameter correlation
+`sandbox/argsynth.py`'s canary synthesis was scoped by `(tool, param)` for
+every parameter, including ones naming a caller **identity**
+(`user_id`/`account_id`/`session_id`/`customer_id`/`owner_id`/`username`/
+`email`). Two different tools that both take a `user_id` therefore received
+two *different* synthesized values, so any server-side state keyed by that
+identity (a registered secret, a generated token) could never be found again
+by a later call to a different tool — the root cause behind most of the v4
+cross-call-leak recall regression on real (non-self-authored) servers.
+Identity-shaped parameter names (matched by vocabulary, never a literal DEV
+string) now get a value that depends only on the parameter name, shared
+across every tool in the deterministic call plan; non-identity free-text
+parameters are unaffected and still vary per tool
+(`tests/test_state_mechanisms.py`).
+
