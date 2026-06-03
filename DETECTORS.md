@@ -872,3 +872,193 @@ changes at all to consume them.
   (not a `Finding`, so it never counts as a detection and never affects the
   gate), so a report is honest about reduced coverage instead of guessing.
 
+## Precision round (priorities 2–6.9)
+A dedicated precision round aimed at real-world servers, not benchmark recall:
+remove decisions keyed on a name the server itself chooses (P2), repair the
+sanitizer/taint model (P3), deepen static flow (P4), extend to JS/TS (P5), and
+clear remaining wording false positives (P6). This section records the resulting detector behavior. No dev-set number changed across this entire
+round (`devset/score_dev.py`: 17/23 static recall, 0/10 FP, unchanged start to
+finish) — every item here is a real-server precision fix or a structural recall
+restore, not something the labeled DEV set could see.
+
+- **P2 — behavior over names.** `response._is_retrieval_tool` now decides
+  "does this tool hand back third-party content" from BEHAVIOR (source shows a
+  network/file-read sink, or a dynamic replay shows the response tracking a
+  supplied url/path argument) instead of matching the tool's own name tokens —
+  closes the evasion where a malicious tool names itself `fetch_x` purely to
+  buy the retrieval-tool severity discount for a hard-coded, self-authored
+  redirect. The echoed-argument downgrade in `response._run_leak` now requires
+  BOTH the surfacing tool's description to declare a log/audit shape
+  (`_is_declared_log_tool`) AND the planting tool's description to declare it
+  records caller input (`_declares_records_input`) — an underscore-named or
+  "internal"-described surfacing tool never qualifies regardless of name.
+  `pyast.analyze_covert_collection`'s log-named-global exemption was removed —
+  a log-named store is treated exactly like any other silent store.
+- **P3 — sanitizer/taint model repair (`ast-taint`).** `pyast.
+  _scan_sanitizer_guards` no longer accepts a guard referenced "anywhere in
+  the function" — it requires the guard's FAILING branch to actually HALT
+  (`return`/`raise`/`continue`/`break`), split into `_membership_guard_names`
+  (a halting allow-list; a deny-list or halt-only-on-hit shape never
+  qualifies) and `_prefix_guard_names` (a prefix test against a CONSTANT base
+  only — a caller-supplied "base" guards nothing). Sink-kind-specific
+  acceptance (`_resolve_sink_sanitization`): a command sink accepts quoting /
+  an argument-list call without a shell / a halting allow-list; a path sink
+  requires a normalized value AND a constant-base prefix guard — neither
+  substitutes for the other. A helper that passes a tainted value UNCHANGED
+  into a shell/eval sink (`def _run(cmd): os.system(cmd)`) now stays at
+  full/critical severity instead of being capped at medium like a generic
+  one-level-inlined finding (`detectors/taint.py`'s
+  `full_severity_helper`/`via_helper_passthrough`). SSRF taint now counts only
+  the conventional first positional argument or a url/host-shaped keyword of a
+  network call — a tainted timeout/option elsewhere no longer counts. A
+  low-level SDK handler's synthesized tool body now seeds taint from the
+  HANDLER's own real parameters, not the declared schema property names (which
+  never appear as bare identifiers in that body) — recovering taint recall
+  `ast-taint` had silently lost on every low-level-SDK-registered tool. New
+  **capability lane** (`detectors/taint.py`, category `excessive-privilege`,
+  `detection_method: declared-capability`, low severity): a sink whose OWN
+  tool description openly declares the exact capability it reaches (runs
+  commands / fetches a caller-supplied URL) is reported as a declared
+  capability, not a command-injection/ssrf finding — the tool is honest about
+  what it does, so it is not treated identically to one smuggling the same
+  behavior silently.
+- **P4 — deeper static flow.** `pyast.extract_returned_string_literals`
+  follows a string/list/dict literal assigned to a local variable and
+  returned later, not just a value returned directly. `pyast.
+  find_duplicate_tool_defs` + `context.build_source_facts` now analyze EVERY
+  definition when a module registers the same declared tool name more than
+  once, merging behavior facts as a worst-case union (previously a
+  last-write-wins dict comprehension could silently keep only the benign
+  definition). `rugpull._run_source`'s runtime tool-metadata-mutation check
+  (`__doc__`/`.description` rewrite) now grades the REWRITTEN TEXT with the
+  same description-grading engine `desc-poisoning` uses — high only when the
+  new text itself carries an agent-directed instruction or sits behind a
+  counter/time/env gate, informational when it is plain prose — instead of
+  grading every mutation high/medium purely because a rewrite happened.
+  `pyast._is_file_state_derived` follows a persisted-counter read through one
+  level of indirection (a local helper that itself reads state and returns a
+  value). `pyast._harvest_candidate_values` also harvests candidate argument
+  values from a dict/list/tuple/set literal defined INSIDE the function
+  itself, not only a module-level one. `pyast.analyze_audit_trail` gained a
+  per-BRANCH check (`_check_branch_level_logging`, issue kind `partial_log`):
+  a state-changing branch with no log write is now flagged even when a
+  SIBLING branch in the same `if`/`elif`/`else` chain of the same tool does
+  log — a tool-level "logs somewhere" check previously let one logging branch
+  make a silently-unlogged sibling branch look compliant.
+- **P5 — JavaScript/TypeScript (`analysis/jsast.py`).** String-literal
+  resolution is now delimiter-aware (`_match_string_literal`/
+  `_resolve_js_string_expr`): a template literal containing an apostrophe no
+  longer truncates, and `"a" + "b"` concatenation and `const NAME = "..."`
+  constants are resolved, for both tool/config descriptions and schema-field
+  description text. Low-level object-literal tool descriptors are matched
+  with brace-BALANCED scanning (`_OBJ_TOOL_START_RE` + `_find_matching`)
+  instead of a regex that stopped at the first nested `{` — a tool object
+  with a nested `inputSchema`/`properties` object of any depth is captured
+  whole, and that schema's own per-field description text is run through
+  `schema-poisoning`. A handler passed BY NAME (`server.tool(name, desc,
+  schema, someHandler)`) is resolved to its own function/arrow-function
+  definition elsewhere in the file (`_find_function_body_by_name`) before
+  extracting params/scanning for sinks. `zod`-style schema builders
+  (`z.object({ param: z.string().describe("...") })`) are read for param
+  names + `.describe()` text (`_extract_zod_properties`) and flow into the
+  tool's `input_schema`, so `schema-poisoning` runs over them with zero new
+  detector code.
+- **P6.1–6.3 — exfiltration/concealment/override wording (`textrules.py`,
+  clause-scoped, alongside the existing `_clause_scoped_exfil`/redirect
+  fallbacks).** Exfiltration (`_clause_scoped_exfil`): a caller-supplied
+  destination ("uploads the file to a webhook URL you provide") no longer
+  counts unless the object being sent is itself unrequested/sensitive
+  (credentials, conversation history, "everything") or the destination is
+  hard-coded — a tool whose stated job is to send/upload to a caller-supplied
+  destination is not exfiltrating. Concealment (`_concealment_from_user_hits`):
+  "hide/suppress/omit X" now requires the SAME clause to say the USER
+  specifically is kept in the dark — a bare parameter/field note ("omit empty
+  fields from the response") no longer counts, and a negated form ("never hide
+  this from the user") is read as a transparency promise, not concealment.
+  Override (`_override_hits`): an override that DEFERS to the user ("if the
+  user explicitly asks you to") is no longer flagged — only one that does NOT
+  condition on the user's own request counts.
+- **P6.4 — auth-shaped calls need to feed a condition (`auth-control-
+  ineffective`).** `pyast.analyze_auth_control` no longer treats an auth-shaped
+  CALL (or a variable assigned from one) as an authorization signal merely
+  because its NAME contains scope/credentials/permissions/roles — its result
+  must actually feed a condition (`If`/`While`/`Assert` test), directly or via
+  a variable, or be a bare discarded statement (the classic "called the check,
+  forgot to act on it" bug, unchanged). A `list_user_roles` read helper whose
+  result is simply returned is now correctly no-signal instead of a false
+  `auth-control-ineffective` finding.
+- **P6.5–6.6 — value-shape and response-redirect (`response.py`).** A
+  national-id-shaped digit pattern (`_value_shape_hits`) now needs a
+  SUPPORTING LABEL (ssn/social security/national id/tax id/...) somewhere in
+  the text before it counts at all — a bare `###-##-####` is just as easily an
+  order/reference code (card numbers already required a Luhn checksum,
+  unchanged). Phone numbers and internal hostnames, when they are the ONLY
+  shape evidence, now earn only `low` (informational) confidence instead of
+  `medium`. `_run_response_redirect`: a "call X" mention now requires an
+  OBLIGATION word (must/should/always/...) or an explicit AGENT addressee
+  (assistant/agent/model/ai/system) in the same clause — a plain, unforced
+  mention is ordinary prose; instructional redirect text inside a
+  behaviorally retrieval-shaped tool's response (reusing P2's
+  `_is_retrieval_tool`) is now annotated (low severity) rather than blocked,
+  matching `response-injection`'s existing untrusted-content stance.
+- **P6.7 — generic side-channel parameter names (`crosstool._run_scope`,
+  `out-of-scope-param`).** Extended past the existing unambiguous bigrams
+  (`llm_name`, `system_prompt`, ...) to GENERIC side-channel-shaped names
+  (`context`/`metadata`/`internal`/`debug`/`trace`) — but unlike the
+  unambiguous bigrams, a generic name alone is just as often an ordinary
+  domain field, so it is only even considered when source CONFIRMS the
+  parameter is never referenced in the function body
+  (`confirmed_unused_in_source`). An unambiguous caller-context name the body
+  DOES consult now grades informational (`low`/`low`) instead of `medium` —
+  actual usage is evidence of domain behavior, not harvesting.
+- **P6.8 — pin descriptions and schemas too (`pinning.py`).** A stored pin
+  now includes a per-tool fingerprint (`_tool_fingerprint`: description +
+  schema + hints, not just the tool NAME), so a rug-pull that keeps the same
+  tool name but silently rewrites what it does or what arguments it takes is
+  caught — previously invisible to the flat name-set hash. The finding
+  reports exactly what changed (`added`/`removed`/`modified` tool-name lists)
+  instead of a bare boolean, and a change that is ONLY an addition (nothing
+  removed, modified, or identity-shifted) is now informational (`low`/`low`)
+  rather than `high` — a growing capability set is ordinary, not a rug-pull
+  signature. Falls back to the old coarse name-hash comparison for a store
+  pinned before this change (no per-tool fingerprints recorded yet).
+- **P6.9 — cross-server naming severity split (`detectors/crossserver.py`,
+  `compare_tool_names`).** Previously an exact shared tool name across two
+  servers was silently dropped and a suffix-clone match (same base name once a
+  version/variant suffix like `_v1` is stripped) always fired at `high`
+  regardless of what the two tools actually did. Now: an EXACT shared name
+  fires `_finding_exact_name_share` at LOW severity/LOW confidence — common
+  and usually benign (two independent honest servers both naming a tool
+  `search`), but still recorded since a name-only client can't otherwise tell
+  the two tools apart (never enough alone to confirm or block — see
+  `gate.py`'s confidence floor). A suffix-clone match now ALSO requires the two
+  tools' DESCRIPTIONS to be near-identical (`_desc_similarity` via
+  `difflib.SequenceMatcher`, threshold `_NEAR_IDENTICAL_DESC_THRESHOLD = 0.85`)
+  before it fires at `high` — a genuine clone copies the original's
+  description near verbatim, whereas an honest `search_v2` can coincidentally
+  normalize to the same base name as an unrelated `search` on another server
+  while doing something completely different. The character-level near-miss
+  (typosquat) path is unchanged: it still fires regardless of description,
+  since a genuine one-edit-distance name collision has no honest explanation.
+  - **Precision gate.** Verified with `tests/test_phase4.py`: a plain shared
+    verb (`search`/`search`) across two honest servers stays LOW/informational
+    (`test_exact_same_tool_name_on_two_honest_servers_stays_clean`); an honest
+    `search_v2` beside an unrelated `search` with a DIFFERENT description is
+    NOT flagged as a suffix clone
+    (`test_suffix_clone_with_unrelated_description_stays_clean`).
+  - **Recall guard.** A real suffix clone (same base name, near-identical
+    description) still fires at `high`
+    (`test_suffix_clone_with_near_identical_description_still_fires`,
+    `test_suffixed_clone_on_a_different_server_fires`).
+  - **Blind spots.** `_desc_similarity` is a syntactic ratio
+    (`difflib.SequenceMatcher`), not semantics — a clone whose author
+    paraphrased the original description in different words (same behavior,
+    different wording) can now fall under the 0.85 threshold and be missed;
+    conversely two unrelated tools that happen to share a boilerplate
+    description template (a generated-from-schema description with almost no
+    free text) could still cross the threshold together. The suffix-stripping
+    vocabulary itself (`_v\d+`/`-copy`/`-old`/...) is a fixed list — a variant
+    marker outside it (e.g. a locale suffix like `_en`) is not recognized as a
+    suffix relationship at all and falls through to the plain exact-name-share
+    or near-miss paths instead.
+
