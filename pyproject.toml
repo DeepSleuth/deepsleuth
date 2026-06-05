@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deepsleuth"
-version = "0.5.1"
+version = "0.5.0"
 description = "Deepsleuth — read the fine print. Deterministic deep-visibility security scanner for MCP servers (no LLM)."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -20,6 +20,8 @@ dependencies = []
 [project.optional-dependencies]
 # Optional: richer (nested) YAML policy files. JSON and flat YAML work without it.
 yaml = ["PyYAML==6.0.2"]
+# Optional: speak MCP via the official SDK instead of the built-in client.
+mcp = ["mcp<2"]
 
 [project.urls]
 Homepage = "https://github.com/DeepSleuth/deepsleuth"
