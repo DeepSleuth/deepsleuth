@@ -5,7 +5,7 @@ ALWAYS emit their finding into the output JSON — recall is preserved, nothing 
 deleted or threshold-silenced. This module runs immediately after every detector
 phase (see ``runner.run_phase``, called identically by both Frontend A and
 Frontend B) and does exactly one thing: it sets each finding's ``confidence``
-from a fully deterministic **contradiction + corroboration** signal. It never deletes a
+from a deterministic **contradiction + corroboration** signal. It never deletes a
 finding, never changes its ``severity``, and never invents a category — it only
 ranks findings so the gate (which acts on ``severity`` + ``confidence`` together,
 per the rule 6/ACTIONABLE-bar contract) can tell a genuine attack from an honestly
