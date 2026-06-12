@@ -157,7 +157,7 @@ def _calibrate_tool_shadowing(findings: List[Finding]) -> None:
 
 # ---------------------------------------------------------------------------
 # tool-poisoning corroboration (Part B, "+ corroboration"): the SAME tool
-# poisoned across MULTIPLE distinct evidence locations (its tool description AND
+# poisoned across MULTIPLE distinct evidence locations (its description AND
 # its schema, or its description AND its name) is materially stronger
 # evidence than a single non-decisive match -- an honest tool essentially
 # never has agent-directed language leak into two independent surfaces at
