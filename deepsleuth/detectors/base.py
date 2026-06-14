@@ -17,7 +17,7 @@ from ..context import ScanContext
 from ..models import Finding
 
 # capabilities a detector may require to be meaningful
-CAP_MANIFEST = "manifest"     # a tool tool listing (declared metadata) exists
+CAP_MANIFEST = "manifest"     # a tool listing (declared metadata) exists
 CAP_SOURCE = "source"         # parsed implementation source exists
 CAP_DYNAMIC = "dynamic"       # live calls/responses were captured
 CAP_PACKAGE = "package"       # package manifests exist
