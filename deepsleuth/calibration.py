@@ -48,7 +48,7 @@ UNCONDITIONAL_DETECTOR_IDS = frozenset({
     "response-leak",            # rule 5.5 / Part A.1 — planted canary surfaced
     "response-oversharing",     # rule 5.5/P2.2 — response shape exceeds declared scope
     "response-injection",       # rule 5.3a / Part A.2 — decisive directive in output
-    "rugpull-runtime",          # rule 5.2 — metadata/response mutated after tool listing
+    "rugpull-runtime",          # rule 5.2 — metadata/response mutated after listing
     "hint-violation",           # rule 5.4 — declared hint contradicted by behavior
     "auth-control-ineffective", # rule 5.9 — a present control proven not to gate
     "session-reuse",            # rule 5.9/P5.2 — ownership-less lookup by shared/guessable id
