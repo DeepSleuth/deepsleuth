@@ -578,7 +578,7 @@ def _typosquat(ctx: ScanContext, path: str, names: List[str], popular) -> List[F
 
 register(Detector(
     id="supply-chain", category="supply-chain", evidence_location="install-time-script",
-    phase="tool listing", run=_run, requires={CAP_PACKAGE},
+    phase="listing", run=_run, requires={CAP_PACKAGE},
     rationale=("Install/build hooks and dependency resolution execute before the "
                "server runs, so they are outside the tool sandbox and invisible to "
                "runtime scanners; parsing manifests statically catches them, scaled "
