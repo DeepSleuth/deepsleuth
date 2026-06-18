@@ -2,7 +2,7 @@
 
 Builds the static Context from a Target, runs the static/source/package detectors,
 then (unless disabled or Docker is absent) launches the server in the Docker
-sandbox, drives a fully deterministic call plan through a real MCP client, captures every
+sandbox, drives a deterministic call plan through a real MCP client, captures every
 response, re-lists tools to diff, and runs the dynamic detectors. Everything feeds
 the *same* core detectors used by the proxy.
 """
