@@ -41,7 +41,7 @@ def build_static_context(target: Target) -> ScanContext:
                                            _collect_module_globals(tree)))
     source_facts = build_source_facts(target.source_files)
     ctx._source_facts = source_facts  # type: ignore[attr-defined]
-    # static tool listing derived from source (used when no live listing available)
+    # static listing derived from source (used when no live listing available)
     ctx.tools = contracts_from_source(source_facts)
     if ctx.tools:
         ctx.layers.add("manifest")
