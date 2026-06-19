@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.6.0] — 2026-06-19
+
+cross-server + supply-chain.
+
+- cross-tool redirect / param-tampering / out-of-scope-param detection
+- supply-chain: install hooks + typosquat analysis
+- cross-server name-overlap pass
+
 ## [0.5.1] — 2026-05-08
 
 fixes.
