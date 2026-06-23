@@ -187,7 +187,7 @@ def load_targets(spec: str) -> List[Target]:
 
 def load_reference_listing(path: str):
     """A tool list to compare against WITHOUT launching a second
-    server: a JSON array of tool entries (``name``/``tool description``/
+    server: a JSON array of tool entries (``name``/``description``/
     ``inputSchema``), or an object with a ``tools`` key (an MCP
     ``tools/list`` result, optionally wrapped in ``result``). Returns a
     manifest-only ``ScanContext`` for the cross-server pass, or ``None``
