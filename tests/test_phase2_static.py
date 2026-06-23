@@ -47,7 +47,7 @@ def test_metadata_mutation_instruction_text_fires_high_without_a_gate():
 
 def test_metadata_mutation_plain_text_is_informational():
     """An UNGATED rewrite to plain, honest prose (no instruction mechanism)
-    is still recorded (the contract is not fixed at tool listing time) but only
+    is still recorded (the contract is not fixed at listing time) but only
     as an informational low/low note."""
     findings, _ = _static("metadata_mutation_plain_informational")
     hits = [f for f in findings if f.detector_id == "runtime-metadata-mutation"]
