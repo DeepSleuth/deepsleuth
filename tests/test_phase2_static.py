@@ -31,7 +31,7 @@ def test_metadata_mutation_fires_runtime_metadata_mutation():
     assert hits[0].severity == "high"
 
 
-# --- rule P4.3 — scan the docstring-mutation TEXT with the tool description rules --
+# --- rule P4.3 — scan the docstring-mutation TEXT with the description rules --
 
 def test_metadata_mutation_instruction_text_fires_high_without_a_gate():
     """An UNGATED rewrite whose text itself carries an instruction must
