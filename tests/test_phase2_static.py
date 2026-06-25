@@ -74,7 +74,7 @@ def test_metadata_mutation_benign_local_var_and_unrelated_doc_stays_clean():
     assert hits == [], [(f.tool_name, f.evidence) for f in hits]
 
 
-# --- rule 2.3 — counter the gate through a persisted-state (file) alias ------------
+# --- rule 2.3 — counter gate through a persisted-state (file) alias ------------
 
 def test_counter_gate_through_file_alias_fires_rugpull_source():
     findings, _ = _static("counter_gate_alias")
