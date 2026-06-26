@@ -40,7 +40,7 @@ def _ctx(target_id: str, server_name: str, tool_names):
 
 
 def _ctx_desc(target_id: str, server_name: str, tools):
-    """Like ``_ctx`` but ``tools`` is ``[(name, tool description), ...]`` — used by
+    """Like ``_ctx`` but ``tools`` is ``[(name, description), ...]`` — used by
     the rule P6.9 tests, which turn on description similarity."""
     t = Target(target_id=target_id)
     ctx = ScanContext(target=t)
