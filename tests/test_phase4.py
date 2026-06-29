@@ -201,7 +201,7 @@ def scan_target_for_note():
     )]
     ctx.layers.add("manifest")
     from deepsleuth.runner import run_phase
-    findings = run_phase(ctx, "tool listing")
+    findings = run_phase(ctx, "listing")
     return findings, ctx
 
 
