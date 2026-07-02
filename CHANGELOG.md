@@ -4,6 +4,12 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.6.1] — 2026-07-02
+
+fixes.
+
+- fix canary seeding order in the round-robin passes
+
 ## [0.6.0] — 2026-06-19
 
 cross-server + supply-chain.
