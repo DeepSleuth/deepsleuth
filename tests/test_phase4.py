@@ -76,7 +76,7 @@ def test_exact_same_tool_name_on_two_honest_servers_stays_clean():
     assert hits[0].detection_method == "cross-server-exact-name-share"
     assert hits[0].severity == "low"
     assert hits[0].confidence == "low"
-    from deepsleuth.the gate import Policy, gate_decision, ALLOW_ANNOTATE
+    from deepsleuth.gate import Policy, gate_decision, ALLOW_ANNOTATE
     decision, _ = gate_decision(findings, Policy.default())
     assert decision == ALLOW_ANNOTATE
 
