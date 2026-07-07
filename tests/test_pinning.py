@@ -104,7 +104,7 @@ def test_two_different_targets_with_different_names_stay_clean():
 
 def test_same_tool_name_but_rewritten_description_is_caught():
     """The classic invisible rug-pull under the old name-only hash: the
-    SAME tool name, but its declared tool description silently changes between
+    SAME tool name, but its declared description silently changes between
     sessions -- must now be caught (high), and the evidence must name the
     specific tool that changed."""
     with tempfile.TemporaryDirectory() as d:
