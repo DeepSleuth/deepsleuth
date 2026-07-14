@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.7.0] — 2026-07-14
+
+state mechanisms.
+
+- cross-call state-mechanism detectors (session-reuse, covert collection, audit-trail)
+- rug-pull source + runtime-diff detection
+- deepsleuth itself runs as an MCP server (list_detectors / check_listing / scan_target)
+
 ## [0.6.1] — 2026-07-02
 
 fixes.
