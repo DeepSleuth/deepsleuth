@@ -28,5 +28,3 @@ from .base import (  # noqa: F401
     Detector,
     register,
 )
-
-# TODO: revisit before 1.0
