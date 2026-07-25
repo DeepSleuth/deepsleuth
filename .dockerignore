@@ -1,0 +1,14 @@
+.git
+__pycache__
+**/__pycache__
+*.pyc
+.venv
+build/
+dist/
+devset
+benchmarks
+tests
+docs
+*.md
+!README.md
+policy.example.yaml
