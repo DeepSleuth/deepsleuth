@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#F59E0B" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="640" fill="#14213D"/>
+  <!-- faint oversized lens ring, right edge -->
+  <circle cx="1265" cy="320" r="330" fill="none" stroke="#F59E0B" stroke-opacity="0.10" stroke-width="26"/>
+  <circle cx="1265" cy="320" r="245" fill="none" stroke="#F8FAFC" stroke-opacity="0.05" stroke-width="14"/>
+  <!-- scent trail arcs, bottom left -->
+  <path d="M60 640 a220 220 0 0 0 220 -220" fill="none" stroke="#F59E0B" stroke-opacity="0.12" stroke-width="10" stroke-linecap="round"/>
+  <path d="M60 640 a320 320 0 0 0 320 -320" fill="none" stroke="#F59E0B" stroke-opacity="0.07" stroke-width="10" stroke-linecap="round"/>
+  <!-- the mark -->
+  <circle cx="250" cy="320" r="230" fill="url(#glow)"/>
+  <g transform="translate(38.8, 97.8) scale(2.2)">
+    <path d="M96 12 L164 40 V106 C164 150 146 172 96 190 C46 172 28 150 28 106 V40 Z" fill="none" stroke="#F8FAFC" stroke-width="10" stroke-linejoin="round"/>
+    <circle cx="96" cy="96" r="32" fill="none" stroke="#F59E0B" stroke-width="9"/>
+    <line x1="118" y1="118" x2="140" y2="140" stroke="#F59E0B" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="84" cy="110" r="4.5" fill="#F59E0B"/>
+    <path d="M74 110 a10 10 0 0 1 20 0" fill="none" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>
+    <path d="M64 110 a20 20 0 0 1 40 0" fill="none" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <!-- wordmark -->
+  <text x="480" y="352" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="118" font-weight="700" letter-spacing="2" fill="#F8FAFC">Deepsleuth</text>
+  <rect x="486" y="392" width="150" height="5" rx="2.5" fill="#F59E0B"/>
+  <text x="490" y="448" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="27" letter-spacing="11" fill="#8B99AD">READ THE FINE PRINT</text>
+</svg>
