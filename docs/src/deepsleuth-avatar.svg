@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" fill="#14213D"/>
+  <!-- flat-top shield, solid fill -->
+  <path d="M330 284 H694 V520 C694 668 612 724 512 770 C412 724 330 668 330 520 Z" fill="#F59E0B"/>
+  <!-- negative-space lens -->
+  <circle cx="512" cy="470" r="95" fill="#14213D"/>
+  <!-- negative-space handle -->
+  <line x1="579.2" y1="537.2" x2="648" y2="606" stroke="#14213D" stroke-width="30" stroke-linecap="round"/>
+  <!-- the trace inside the lens -->
+  <circle cx="476" cy="512" r="13" fill="#F59E0B"/>
+  <path d="M447 512 a29 29 0 0 1 58 0" fill="none" stroke="#F59E0B" stroke-width="17" stroke-linecap="round"/>
+  <path d="M418 512 a58 58 0 0 1 116 0" fill="none" stroke="#F59E0B" stroke-width="17" stroke-linecap="round"/>
+</svg>
