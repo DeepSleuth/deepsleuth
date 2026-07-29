@@ -1,0 +1,38 @@
+{
+  "dataset": "mcpsecbench",
+  "total_malicious": 9,
+  "total_benign": 6,
+  "scored_commit": "334bee9d96de83958c9e0472ee6da698429a91e5",
+  "loose_recall_count": 9,
+  "loose_recall_pct": 100.0,
+  "loose_recall_targets": [
+    "maliciousadd-malicious::add",
+    "maliciousadd-malicious::aft_check",
+    "maliciousadd-malicious::get_and_read_all_files",
+    "maliciousadd-malicious::get_user_info",
+    "maliciousadd-malicious::get_weather_forecast",
+    "maliciousadd-malicious::m_check",
+    "maliciousadd-malicious::modify",
+    "maliciousadd-malicious::sandbox_run",
+    "maliciousadd-malicious::show_credentials"
+  ],
+  "actionable_count": 9,
+  "mechanism_strict_count": 8,
+  "mechanism_strict_pct": 88.9,
+  "mechanism_strict_targets": [
+    "maliciousadd-malicious::add",
+    "maliciousadd-malicious::aft_check",
+    "maliciousadd-malicious::get_and_read_all_files",
+    "maliciousadd-malicious::get_user_info",
+    "maliciousadd-malicious::get_weather_forecast",
+    "maliciousadd-malicious::m_check",
+    "maliciousadd-malicious::sandbox_run",
+    "maliciousadd-malicious::show_credentials"
+  ],
+  "missed_targets": [],
+  "false_positives_any_finding": 1,
+  "false_positives_actionable": 0,
+  "false_positives_targets": [],
+  "execution_note": "Full static+dynamic scan (Docker sandbox) of the two server files as isolated single-server targets.",
+  "strict_rule": "actionable finding from the detector family that names the planted mechanism (description poisoning; decoy-file read; response/static injection; runtime metadata mutation or rug-pull gate; taint to a command sink; credential over-sharing)"
+}
