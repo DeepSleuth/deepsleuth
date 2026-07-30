@@ -1,0 +1,32 @@
+{
+  "dataset": "mcptox",
+  "total_malicious": 485,
+  "total_benign": 0,
+  "scored_commit": "334bee9d96de83958c9e0472ee6da698429a91e5",
+  "loose_recall_count": 392,
+  "loose_recall_pct": 80.8,
+  "actionable_count": 345,
+  "actionable_pct": 71.1,
+  "mechanism_strict_count": 345,
+  "mechanism_strict_pct": 71.1,
+  "withheld_or_blocked_count": 343,
+  "missed_count": 93,
+  "in_listing": {
+    "loose_recall_count": 457,
+    "actionable_count": 425,
+    "mechanism_strict_count": 425
+  },
+  "detector_id_tally": {
+    "cross-tool-redirect": 358,
+    "desc-poisoning": 156,
+    "param-tampering": 111,
+    "tool-shadowing": 6
+  },
+  "strict_rule": "actionable finding (severity>=medium and confidence>=medium) from cross-tool-redirect, param-tampering, desc-poisoning or schema-poisoning; loose = any finding of any grade; in_listing = the same tool scanned among its server's clean tools",
+  "benign_half": {
+    "clean_tools": 362,
+    "tools_with_any_finding": 1,
+    "tools_actionable": 1,
+    "source": "MCPTox's own clean tool lists (response_all.json clean_system_promot), scanned per server"
+  }
+}
