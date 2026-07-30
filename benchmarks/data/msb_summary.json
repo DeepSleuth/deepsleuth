@@ -1,0 +1,51 @@
+{
+  "dataset": "msb",
+  "total_malicious": 90,
+  "total_benign": 21,
+  "scored_commit": "334bee9d96de83958c9e0472ee6da698429a91e5",
+  "loose_recall_count": 72,
+  "loose_recall_pct": 80.0,
+  "actionable_count": 66,
+  "actionable_pct": 73.3,
+  "mechanism_strict_count": 66,
+  "mechanism_strict_pct": 73.3,
+  "name_overlap_paired_with_clean_twin_strict_count": 18,
+  "false_positives_any_finding": 1,
+  "false_positives_actionable": 1,
+  "false_positives_targets": [
+    "execute_command"
+  ],
+  "by_attack_type": {
+    "name_overlap": {
+      "total": 18,
+      "loose": 0,
+      "actionable": 0,
+      "mechanism_strict": 0
+    },
+    "out_of_scope_parameter": {
+      "total": 18,
+      "loose": 18,
+      "actionable": 12,
+      "mechanism_strict": 12
+    },
+    "preference_manipulation-out_of_scope_parameter": {
+      "total": 18,
+      "loose": 18,
+      "actionable": 18,
+      "mechanism_strict": 18
+    },
+    "preference_manipulation": {
+      "total": 18,
+      "loose": 18,
+      "actionable": 18,
+      "mechanism_strict": 18
+    },
+    "tool_transfer": {
+      "total": 18,
+      "loose": 18,
+      "actionable": 18,
+      "mechanism_strict": 18
+    }
+  },
+  "strict_rule": "actionable finding from the detector that names the planted mechanism: tool_transfer -> static-response-poisoning/response-injection; preference_manipulation -> desc-poisoning; out_of_scope_parameter -> out-of-scope-param; name_overlap -> cross-server-name-overlap (only possible when the variant is scanned together with its clean twin; reported separately)"
+}
