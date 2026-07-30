@@ -1,0 +1,38 @@
+{
+  "dataset": "visibility-bench",
+  "scored_commit": "334bee9d96de83958c9e0472ee6da698429a91e5",
+  "all_60": {
+    "malicious": 41,
+    "benign": 19,
+    "loose": 41,
+    "actionable": 39,
+    "mechanism_strict": 37,
+    "withheld_or_blocked": 30,
+    "false_positives_any_finding": 3,
+    "false_positives_actionable": 0,
+    "false_positive_targets": []
+  },
+  "held_out_27": {
+    "malicious": 18,
+    "benign": 9,
+    "loose": 18,
+    "actionable": 16,
+    "mechanism_strict": 15,
+    "withheld_or_blocked": 13,
+    "false_positives_any_finding": 1,
+    "false_positives_actionable": 0,
+    "false_positive_targets": []
+  },
+  "dev_33": {
+    "malicious": 23,
+    "benign": 10,
+    "loose": 23,
+    "actionable": 23,
+    "mechanism_strict": 22,
+    "withheld_or_blocked": 17,
+    "false_positives_any_finding": 2,
+    "false_positives_actionable": 0,
+    "false_positive_targets": []
+  },
+  "strict_rule": "actionable finding from a detector mapped to the case's OWASP category (MCP01 leaks; MCP02 hint-violation; MCP04 supply-chain, cross-server names or covert collection; MCP06 response injection/redirect; MCP07 auth/session; MCP08 audit trail; MCP09 identity; MCP10 over-sharing/leak). In-sample: the detectors were built from reports that analysed all 60 cases."
+}
