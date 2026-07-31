@@ -1077,3 +1077,10 @@ across every tool in the deterministic call plan; non-identity free-text
 parameters are unaffected and still vary per tool
 (`tests/test_state_mechanisms.py`).
 
+## v3 mechanism guide
+The v3 round removes every severity discount keyed on something the server
+author can freely write (a description, a name, the mere presence of a call),
+finishes the structure rules and wording vetoes, and deepens static/dynamic
+context. Each item ships a malicious fixture that must stay caught at its
+stated grade and an honest twin (`tests/test_v3_guide.py`).
+
