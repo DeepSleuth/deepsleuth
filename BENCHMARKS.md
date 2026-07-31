@@ -43,3 +43,22 @@ scanner given the context the sibling rule was built for. This round moved the
 two rows in opposite directions (alone 358 to 345, with the tool list 395 to
 425); the version history below explains why.
 
+## Precision on real servers (never used for tuning)
+
+168 live server listings with 1,544 tools, captured from live public registries during our own measurement runs. There is
+no ground truth; the servers are overwhelmingly ordinary.
+
+| Version | Tools with any finding | Tools actionable | Tools withheld by the default policy | Servers with an actionable finding |
+|---|---|---|---|---|
+| original (`3253f8b`) | 110 | 110 | 104 | 42 |
+| round 1 (`5ae56ca`) | 87 | 87 | 78 | 41 |
+| precision round (`742158b`) | 83 | 48 | 37 | 22 |
+| first mechanism round (`d2cba73`) | 64 | 24 | 21 | 15 |
+| second mechanism round (`3654815`) | 64 | 24 | 21 | 15 |
+| **this version (`334bee9`)** | **63 (4.1%)** | **19 (1.2%)** | **16 (1.0%)** | **12 (7%)** |
+
+Other corpora never used for tuning: MCP-Universe (13 Python servers, 159
+tools) 5 tools actionable, two of them genuine command runners; sentinel-scan-cli
+fixtures 11/20 malicious caught (9/20 in the previous version), 0/20 clean
+flagged; mcp-shield JavaScript demo 3/5 poisoned tools caught.
+
