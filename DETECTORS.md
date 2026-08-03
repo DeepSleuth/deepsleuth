@@ -1084,3 +1084,64 @@ finishes the structure rules and wording vetoes, and deepens static/dynamic
 context. Each item ships a malicious fixture that must stay caught at its
 stated grade and an honest twin (`tests/test_v3_guide.py`).
 
+### Priority 1 — no discount on anything the author controls
+- **1.1 `ast-taint` capability lane is additive.** A description that openly
+  declares the capability a sink reaches (runs commands / fetches a URL)
+  still earns the low `declared-capability` note, but the taint finding is
+  now ALSO emitted at its full grade (`evidence.declared_capability: true`).
+  A tool that says "runs caller-supplied commands" and interpolates them into
+  `shell=True` is a critical injection; only a VERIFIED sanitizer (data flow:
+  halting allow-list, argv-list call, quoting, normalized-path + prefix
+  guard) downgrades it (`capability_declared_command` critical vs.
+  `capability_declared_command_sanitized` informational).
+  - *Blind spots.* The note itself keys on a closed verb vocabulary
+    (run/execute/invoke + command/shell/script; fetch/download + url/page);
+    a declaration phrased outside it simply gets no note (the taint finding
+    is unaffected either way).
+- **1.2 retrieval needs data flow, not presence (`response-injection`,
+  `response-redirect`).** `BehaviorFacts.returns_external_content` (new,
+  `pyast._FuncAnalyzer.visit_Return` + `read_derived` tracking; JS text
+  approximation `jsast._js_returns_external_content`) is True only when a
+  `return` expression derives from the RESULT of a network call / file read
+  (through assignments, `with open(...) as fh`, `for line in fh`, a helper
+  that itself returns read content). `response._is_retrieval_tool` now uses
+  this instead of `facts.network or facts.reads_fs`: a tool that pings a URL
+  for telemetry and returns a constant poisoned string gets no discount
+  (`retrieval_const_return_poisoned` high/high vs. `retrieval_returns_fetched`
+  annotated low). The dynamic replay branch now requires BOTH that the
+  response varies with the url/path argument AND that the specific injected
+  clause (`_injected_clause_probe` / `_clause_probe`, compared on the
+  normalized form) is absent from at least one replay — a fixed suffix
+  appended to every answer is self-authored whatever the rest of the
+  response does.
+  - *Blind spots.* Read-derivation is intra-procedural plus one helper level;
+    content pulled through an object attribute set elsewhere (`self.cache`)
+    or across modules is not tracked (such a tool simply earns no discount —
+    a precision, not a recall, gap). The JS approximation is regex-level: a
+    destructured binding (`const {data} = await axios.get(...)`) is missed.
+- **1.3 `response-leak` audit-echo exemption is symmetric.** A plain-argument
+  canary echoed by a surfacing tool that DECLARES a log/history/audit purpose
+  grades low/medium when the planting tool also declares it records input
+  (unchanged), and now medium/medium (confirm) when the planting tool is
+  SILENT about recording — previously high/high. An underscore-named or
+  "internal"-described surfacing tool never qualifies; a secret-kind canary
+  is high/high everywhere (`audit_echo_declared_log` medium vs.
+  `audit_echo_internal_surface` high).
+  - *Blind spots.* "Declares a log purpose" is a token test on the surfacing
+    tool's description (log/history/audit/record/trail); a log tool described
+    with none of these words gets no exemption at all (over-reports, never
+    under-reports).
+- **1.4 `response-redirect` label-shaped directive.** Second trigger beside
+  the obligation/addressee verb form: a closed label vocabulary
+  (`next_step`, `next_action`, `action`, `todo`, `then`, `step`,
+  `instruction`, `command`, `directive`, `task`, `follow_up`, `do`, `run`,
+  `execute`) in key/value or label form whose VALUE is a CALL to a tool this
+  server does not declare — a call verb + tool-shaped identifier, or the
+  identifier followed by `(`. A label whose value is a bare status word
+  (`action: refund_issued`) is not a call and never matches; a label naming
+  one of the server's own tools stays clean (`label_directive_redirect` vs.
+  `label_directive_redirect_benign`).
+  - *Blind spots.* The identifier must be snake_case (the same shape test the
+    verb form already uses); a camelCase or single-word undeclared tool name
+    in a label is not recognised.
+
