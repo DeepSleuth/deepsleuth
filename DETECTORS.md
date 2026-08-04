@@ -1145,3 +1145,88 @@ stated grade and an honest twin (`tests/test_v3_guide.py`).
     verb form already uses); a camelCase or single-word undeclared tool name
     in a label is not recognised.
 
+### Priority 2 — finish the structure rules (`cross-tool-redirect`, `param-tampering`, `desc-poisoning`, `tool-shadowing`)
+- **2.1 direction test.** `crosstool._CONDITIONS_ON_OTHER_RX` now requires
+  "when/whenever/while/once" to be DIRECTLY followed by "you"/"the agent"
+  (at most two intervening words) or an invoke verb before the sibling name;
+  "at once", "all at once" and "once more" are excluded as adverbial idioms
+  (`crosstool_direction_idiom_benign` informational vs.
+  `crosstool_direction_conditions` actionable, reason
+  `conditions-on-other-tool`).
+- **2.2 single-word sibling names.** `crosstool._name_pattern`: a sibling whose
+  name is a single bare token (no `_`/`-`/`.` separator, no camelCase —
+  `_is_single_word_name`) matches only when quoted/backticked or adjacent to
+  the word "tool" (`the `search` tool`, `tool named search`). The existing
+  short/common-word exclusion in `_sibling_names` is unchanged
+  (`crosstool_single_word_sibling_benign` clean vs.
+  `crosstool_single_word_sibling_quoted` actionable).
+  - *Blind spots.* A single-word sibling referenced bare by a genuine
+    attacker ("always call summarize first") is now invisible to the sibling
+    rule unless quoted — accepted on purpose: the bare word is
+    indistinguishable from ordinary prose.
+- **2.3 dash/semicolon sub-clauses for the threat test.** `_threat_near_sibling`
+  splits the clause on em/en dashes, " - " and ";" and tests `_THREAT_RX`
+  only in the sub-clause that names the sibling, so an aside ("- note: large
+  exports may fail") no longer escalates the reference in the previous
+  sub-clause (`crosstool_dash_threat_benign` informational vs.
+  `crosstool_redirect_threat` actionable). Done locally in `crosstool.py`;
+  the global `textrules._clauses` is untouched (splitting the exfiltration
+  families on dashes would separate a verb from its destination).
+- **2.4 add/include/insert as invoke verbs.** `_invoke_in_clause` (and the
+  response-side `_ADD_TOOL_VERB_RE` + `_RESPONSE_PLAN_NOUN_RE` in
+  `response._run_response_redirect`) count `add`/`include`/`insert` as an
+  invoke verb only when the verb's object (within 40 chars) is the
+  tool-shaped sibling identifier AND the clause names a plan/response/call
+  list/next step (`_PLAN_NOUN_RX`) (`crosstool_add_to_plan` actionable vs.
+  `crosstool_add_to_plan_benign` clean).
+- **2.5 session-bootstrap carve-out for `preference_manipulation`.**
+  `textrules._bootstrap_veto` (via the new `_ClauseVetoed` pattern wrapper)
+  vetoes the "always/must call X before using any other tool" shape, in
+  either word order, when the precondition is a NAMED sibling (never
+  "this tool"/"it") and the target is the generic "any/all other tool(s)"
+  (`bootstrap_preference_benign` clean vs. `bootstrap_self_precondition`
+  still fires).
+- **2.6 `tool-shadowing` own-parameter talk.** `identity._shadow_match_is_own_
+  parameter_talk`: a quoted token that is one of the tool's own schema
+  property names or enum values, or "override"/"replace" governing a
+  parameter/argument/option/mode/setting/default/value/field/flag word
+  within 45 chars, is parameter semantics, not identity assertion
+  (`tool_shadow_own_param_benign` clean vs. `tool_shadow`/`tool_shadow2`
+  still fire).
+- **2.7 `param-tampering` actionable only against the OTHER tool's argument.**
+  `_tamper_actionable_reason`: actionable on a strong obligation word, or
+  when the argument named (a quoted literal, or a bare word next to an
+  argument/parameter/field word — `_argument_names_in_clause`) is a property
+  of the SIBLING's schema (`sibling-parameter-named`); a sentence naming only
+  the tool's OWN parameters is informational even with a tamper verb and a
+  literal. Threat-of-failure and sensitive-target stay as secondary reasons.
+  In quoted-name mode (no schema for the victim) a literal that is one of
+  the tool's own properties no longer counts (`param_tampering_own_mode_
+  benign` informational vs. `param_tampering_literal_no_strongword`
+  actionable with reason `sibling-parameter-named`).
+  - *Blind spots.* Sibling schemas are only available for co-listed tools;
+    the quoted-name mode keeps the older literal-value reason since there is
+    no schema to check against.
+- **2.8 self-promotion needs a comparative target or a universal claim.**
+  `textrules._superlative_veto`: the three self-promotion patterns count only
+  when the same clause carries a comparative target (other tools,
+  alternatives, instead of, rather than, than any, any/all other, compared
+  to, competitors) or a universal claim (in the world, available, ever, of
+  all, on the market, anywhere, bar none, unmatched/unrivaled/unbeatable,
+  number one). "The only tool that can X" is a scope statement, informational
+  (`self_promotion_scope_benign` vs. `self_promotion_comparative`).
+- **2.9 negated agent directive pointing at a sibling.**
+  `textrules._negated_routing_veto` on `agent_directive` pattern 1 and
+  `next_action_redirect` pattern (c): a modal followed by not/never (or
+  shouldn't/mustn't/...) whose clause, or the clause right after it, routes
+  to a quoted/tool-shaped identifier ("use X instead", "via X") is routing,
+  not steering — informational (`negated_directive_routing_benign` vs.
+  `agent_directive_positive` high/high).
+- **3.1 (same mechanism) concealment adverb negation veto.**
+  `textrules._adverb_negation_veto`: "does not / do not / never / rather than
+  / instead of / without / not ..." within two words before
+  "silently/secretly/covertly/discreetly/surreptitiously" cancels the match.
+  The adverb pattern's action verbs are now inflected (sends/forwards/
+  uploaded/...): the base-form-only list silently missed "silently forwards"
+  (`concealment_negated_benign` vs. `concealment_adverb`).
+
