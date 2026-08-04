@@ -1230,3 +1230,58 @@ stated grade and an honest twin (`tests/test_v3_guide.py`).
   uploaded/...): the base-form-only list silently missed "silently forwards"
   (`concealment_negated_benign` vs. `concealment_adverb`).
 
+### Priority 3 — finish the wording vetoes
+- **3.2 ingestion is not exfiltration (`desc-poisoning`/`response-injection`,
+  `textrules._clause_scoped_exfil`).** `_is_ingestion_clause`: an ingestion
+  verb (fetch/download/pull/sync/import/ingest/retrieve/read/load/copy/
+  mirror/crawl/scrape/clone/collect/gather/harvest/poll) with EVERY remote
+  marker in the clause preceded by "from" and NO remote marker preceded by
+  to/into/at/toward vetoes the exfiltration match — the remote side is the
+  SOURCE and the data flows into the server's own store. A clause with a
+  remote source AND a remote destination ("syncs from the wiki and posts a
+  copy to https://...") still counts. The exfil verb lists are now inflected
+  (sends/uploads/forwarded/...): the base-form-only list silently missed
+  "uploads the database to the remote endpoint"
+  (`ingestion_not_exfil_benign` vs. `exfil_to_remote`).
+  - *Blind spots.* Direction is read from "from"/"to" prepositions only; a
+    clause that names the remote without either ("mirrors the external feed
+    locally") is treated as ingestion when an ingestion verb is present.
+- **3.3 `auth-control-ineffective` discarded-result branch.**
+  `pyast._is_authorization_verb_call`: the "called the check, discarded the
+  result" branch of `analyze_auth_control` now applies only to a call whose
+  name is an exact authorization verb class — an authorize/authenticate
+  verb, or a check-verb (check/has/verify/require/ensure/assert/validate/is/
+  can/enforce/confirm) paired with an auth object (permission/role/access/
+  scope/auth/token/admin/privilege/owner/...). A discarded `get_credentials()`
+  or `permissions().create()` is an API call, not a check
+  (`auth_discarded_api_call_benign` clean vs. `auth_discarded_check` flagged).
+- **3.4 `ast-taint` canonical path guards and nested sanitizers.**
+  `pyast._FuncAnalyzer._const_like` accepts `BASE + os.sep`, `BASE + "/"`,
+  `f"{BASE}/"`, `os.path.join/realpath/abspath/normpath(BASE...)`,
+  `Path(BASE).resolve()`, `os.sep`, and tuples of bases;
+  `_guarded_value_names` looks through `Path(x)`/`str(x)`/`realpath(x)` to
+  the guarded local in `.is_relative_to`/`.startswith` receivers;
+  `os.path.commonpath([...]) == <const-like>` already worked. New
+  `SinkRecord.strip_nested` (`_taint_relative_to_strip_calls`): a sink whose
+  EVERY tainted name reaches it only inside a nested `os.path.basename`/
+  `shlex.quote` call in the sink's own argument expression is sanitized; one
+  raw tainted name alongside a stripped one is not (`path_guard_canonical_
+  benign` all sanitized vs. `path_guard_nested_strip_bypassed` actionable).
+  - *Blind spots.* A pathlib method sink on a tainted receiver
+    (`Path(p).read_text()`) is still not tracked as tainted at all
+    (pre-existing). A prefix test against a base computed through any call
+    outside the canonical wrapper set is not recognised.
+- **3.5 `response-oversharing` unrelated-field heuristic is informational.**
+  `_scope_oversharing`: a field-vocabulary mismatch ALONE now grades low
+  confidence; medium requires a sensitive value shape or an unpromised record
+  list alongside it, or a strong shape hit on its own (as before). Two value
+  shapes were added so that genuinely sensitive content is still a shape: an
+  email attributed to another owner (`attributed-email`, previously folded
+  into the field-mismatch flag) and an internal/private/system/backend-
+  labelled identifier or debug/diagnostic error/trace (`internal-labeled-
+  value`) (`oversharing_fields_only` low vs. `oversharing_fields_with_
+  internal_id` medium).
+  - *Blind spots.* Over-sharing of plain free text that is neither labelled
+    sensitive nor a record list (an unpromised "account notes" paragraph with
+    no internal id beside it) is now informational only.
+
