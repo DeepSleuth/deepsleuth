@@ -1285,3 +1285,77 @@ stated grade and an honest twin (`tests/test_v3_guide.py`).
     sensitive nor a record list (an unpromised "account notes" paragraph with
     no internal id beside it) is now informational only.
 
+### Priority 4 — context and call order
+- **4.1 cross-server pass whenever the scan can see siblings
+  (`cross-server-name-overlap`).** `scanner.scan` now runs
+  `crossserver.compare_tool_names` over: every target in the batch (as
+  before); per-module pseudo-contexts when ONE directory holds several
+  server entry modules (`scanner._server_module_groups`: a module that
+  constructs an MCP server object at module level — the SDK constructor
+  shapes `FastMCP(`/`MCP(`/`Server(`/`McpServer(`/`new McpServer(` — with
+  its own registered tools; a helper module that only adds tools to an
+  imported server is not a separate server); and a `--reference-listing
+  <json>` tool list (`target_loader.load_reference_listing`: a JSON array of
+  tool entries or an object with a `tools` key, optionally under `result`,
+  `serverInfo.name` used as the label) compared against without launching a
+  second server (`multi_server_dir` fires a suffix clone vs.
+  `multi_module_single_server_benign` clean).
+  - *Blind spots.* A server constructed through a factory function or a
+    class not named like the SDK constructors is not recognised as a
+    separate entry point (its tools stay in the single target's listing).
+- **4.2 call plan ordered by behavior (`sandbox/argsynth.build_call_plan`).**
+  New `BehaviorFacts.resets_state` (`pyast`: a module global, or a
+  constant-keyed slot of one, assigned zero/empty/None/False; `.clear()` on
+  module state; `json.dump`/`write`/`write_text` of an empty/zero payload).
+  `_ordered_tools` ranks mutators (mutates state / writes / deletes /
+  accumulates) first, readers next, resetters last — in every phase — and
+  the burst is repeated once after the round-robin passes. Before any of
+  that, a one-call BASELINE pass observes every reader (never a resetter):
+  a value a mutator creates and a reader later surfaces (a reset code, a
+  minted token) is only visible as `rugpull-runtime`'s first-vs-later
+  labelled-secret drift if the reader was seen once before the mutators
+  ran — mutators-first alone erased that baseline (one dev case regressed
+  until the baseline was added; the old plan had it only by the accident of
+  alphabetical order). The name-token reset heuristic is gone: a tool named
+  `reset_view` that only reads is an ordinary reader, and
+  `start_fresh_session` that zeroes a counter is a resetter
+  (`plan_order_reset_by_behavior` vs. `plan_order_reset_named_benign`;
+  `rugpull_burst` still trips live).
+  - *Blind spots.* With no source at all (live listing only) every tool is a
+    reader; ordering is then purely alphabetical and a reset-shaped tool can
+    interleave. A reset performed through a database/HTTP call is invisible.
+- **4.3 descriptions merged across duplicate definitions (`desc-poisoning`,
+  `cross-tool-redirect`/`param-tampering`, `tool-shadowing`).**
+  `ToolDef.alt_descriptions` (filled by `context.build_source_facts` from
+  `find_duplicate_tool_defs`) carries every other duplicate definition's
+  distinct description; `context.contract_descriptions(c)` yields them all
+  and the three description consumers iterate it (`duplicate_desc_poisoned_
+  first` fires vs. `duplicate_desc_benign` clean).
+- **4.4 "consulted" parameters (`out-of-scope-param`,
+  `auth-control-ineffective`).** `pyast._param_consulted` replaces the bare
+  name-reference test for `unused_params` and the unconsulted-permission
+  branch: a parameter is consulted only when used in a computation, a
+  comparison, a return, a subscript/attribute, a call whose result is
+  consumed, or a store into module state; passing it unchanged into a bare
+  call whose result is discarded, only logging it (logging/logger/log/print/
+  audit/telemetry roots or info/debug/warning/error/... methods), or binding
+  it to a local that is never read again counts as unused
+  (`out_of_scope_param_logged_only` high/high vs. `out_of_scope_param_used_
+  informational` low).
+  - *Blind spots.* A discarded call that has a side effect elsewhere
+    (writes the value to a database) reads as "unused" — for the harvesting
+    rule that is the conservative direction (it raises, not lowers).
+- **4.5 helper inlining: two levels and module-level instances (`ast-taint`,
+  `hint-violation`).** `_inline_helper_call` now descends one further level
+  (`inline_depth`, never into the helper itself), and
+  `collect_module_instance_methods` resolves `R.go(x)` when `R = Runner()`
+  at module scope (or `Runner.go(x)`) to the class's method. A nested sink
+  is a bare passthrough chain only when EVERY hop passes a bare parameter,
+  so `tool -> _prepare(cmd) -> _run_shell(cmd) -> os.system(cmd)` stays
+  critical while a defended second-level helper is informational; the
+  existing helper severity rules are unchanged (`taint_helper_two_level`,
+  `taint_instance_method` critical vs. `taint_helper_two_level_benign`).
+  - *Blind spots.* Depth stops at two; instance methods reached through
+    `self.<attr>` on an object created inside the tool, inherited methods,
+    and cross-module helpers are still not entered.
+
