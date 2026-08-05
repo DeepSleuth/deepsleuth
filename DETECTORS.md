@@ -1359,3 +1359,15 @@ stated grade and an honest twin (`tests/test_v3_guide.py`).
     `self.<attr>` on an object created inside the tool, inherited methods,
     and cross-module helpers are still not entered.
 
+### Round-wide: inflected verb classes (`scope-creep`, `desc-poisoning` exfiltration/concealment)
+Three closed verb vocabularies were base-form only and silently missed the
+third-person/past/progressive form the brief's one-character rule forbids
+missing: `privilege.READ_VERBS`/`WRITE_VERBS` ("Runs a maintenance command
+... from the routine list" read as read-shaped, so an honest exec tool fired
+`scope-creep`), `textrules._EXFIL_VERB`/`_EXFIL_WEAK_VERB` ("uploads ... to
+the remote endpoint" never matched), and the concealment adverb pattern's
+action verbs ("silently forwards" never matched). All three are now
+inflected; the mechanism is unchanged. Surfaced by the honest twins and
+malicious fixtures of this round (`capability_declared_command_sanitized`,
+`exfil_to_remote`, `concealment_adverb`).
+
