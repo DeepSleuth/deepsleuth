@@ -1371,3 +1371,212 @@ inflected; the mechanism is unchanged. Surfaced by the honest twins and
 malicious fixtures of this round (`capability_declared_command_sanitized`,
 `exfil_to_remote`, `concealment_adverb`).
 
+## v4 mechanism guide
+The v4 round replaces the last description-keyed downgrade with a shape test,
+widens three closed verb/sanitizer vocabularies, adds a declared-capability
+policy lane, and gives the JavaScript frontend one level of taint flow. Each
+item ships a malicious fixture that must stay caught at its stated grade and
+an honest twin (`tests/test_v4_guide.py`).
+
+- **1 `response-leak` audit-echo by ATTRIBUTION, not by description.** The
+  v3 exemption needed the surfacing tool to SAY it is a log and the planting
+  tool to SAY it records input — both words the author writes freely. Now a
+  plain-argument canary that resurfaces INSIDE A RECORD THAT ALSO NAMES THE
+  PLANTING TOOL is an attributed audit entry, graded low/medium with a
+  warning (`evidence.attributed: true`, `attribution`, `record_excerpt`),
+  whatever either description says; a bare echoed value whose record names
+  nothing is high/high. The record (`_record_containing`) is the innermost
+  JSON object that is an element of a list (a list of entries) or the root
+  object when the response/line parses as JSON, a bare string entry of a
+  list, else the line holding the value. Attribution
+  (`_attribution_pattern`) is the planting tool's identifier with optional
+  separators (`create_ticket` / `createTicket` / `create ticket`) or an
+  inflected form of a verb token of its name drawn from a closed generic
+  action-verb vocabulary (`_ATTRIBUTION_VERBS`: "Created ticket #7 with
+  note ..." attributes to `create_ticket`; "note" in `set_note` is a noun
+  and never attributes). The echoed value itself is scrubbed before the
+  test. An underscore-named or internal/private/hidden/debug-described
+  surfacing tool (`_is_internal_surface`) and a secret-kind canary are never
+  downgraded (`audit_echo_attributed` low/medium vs. `leak_bare_echo`
+  high/high; `audit_echo_declared_log` is now low/medium too — its record
+  reads `create_ticket(note=...)`).
+  - *Blind spots.* An attacker can dress a leak as an audit record (name
+    the planting tool beside the value) and earn the warning grade — the
+    finding is still emitted, with the record excerpt, for confirmation. A
+    plain-text response that is one long line is one record, so a tool name
+    mentioned anywhere on that line attributes a value echoed elsewhere on
+    it. A JSON root object with nested objects (no list) is one record.
+- **2 `scope-creep` write-verb coverage (`privilege.WRITE_VERBS`,
+  `_write_verb_present`).** A description is read-shaped only if it has a
+  read verb and NO write verb; the write class now also covers apply,
+  register, assign, submit, increment, enroll, activate, deactivate (with
+  inflections) anywhere in the text, and record, mark, credit, debit,
+  charge, grant — words that are just as often nouns ("a customer record",
+  "store credit", "a service charge") — only in VERB POSITION: clause-
+  initial, or after a conjunction / modal / infinitive marker / subject
+  pronoun ("and marks", "will charge", "to record", "it credits"); their
+  -ed/-ing forms after an auxiliary or the same leaders ("is recorded",
+  "after charging"), never after a determiner or a noun ("the recorded
+  value", "items marked done"). So "Gets the balance and marks the account
+  as reviewed" declares its write and is not scope creep, while "Look up a
+  customer record by id" stays read-shaped (`scope_creep_read_verb_mutation`
+  medium/medium vs. `scope_creep_write_verb_declared_benign` clean).
+  - *Blind spots.* Verb position is decided by the preceding word in the
+    clause, not by a parser: "Returns the status; marks are ignored" reads
+    "marks" after a clause break as a verb. Any author can of course declare
+    a write to escape the read-shape test — that is the contract-vs-behavior
+    rule working as designed, not a discount.
+- **3 "consulted" refinement (`pyast._param_consulted`; `out-of-scope-
+  param`, `auth-control-ineffective`).** A parameter passed into a call is
+  USED when the call's result is assigned, returned, awaited, yielded or
+  tested in a condition (anything that leaves the statement something other
+  than a bare `Expr(Call)`), or when the call is a METHOD ON MODULE STATE —
+  any method now (`_INDEX.warm(p)`, `_DB.execute(q, (p,))`,
+  `_MEMORY.store(k, p)`), not only the list/dict mutators of
+  `_MUTATING_METHODS`: the store is the observable effect. It is UNUSED
+  only when the call is a bare expression statement whose result is
+  discarded (`_emit(p)`) or a logging/print call
+  (`consulted_bare_call_discarded` high/high vs. `consulted_state_method_
+  benign` low/low).
+  - *Blind spots.* A bare module-level function with a side effect
+    elsewhere (`_persist(p)` writing to a database) still reads as unused —
+    the conservative direction for the harvesting rule. Module state is the
+    module's globals plus `global` declarations; an object reached through
+    an import (`db.session.add(p)`) is not module state.
+- **4 generic side-channel names need an empty or caller-context-shaped
+  description (`crosstool._run_scope`, `_desc_is_caller_context_shaped`).**
+  A generic side-channel NAME (context/metadata/internal/debug/trace) is
+  actionable (medium/medium) only when the parameter is unused in source
+  AND its description is empty, matches the explicit caller-context
+  patterns, or has no content word outside a closed filler + side-channel/
+  caller vocabulary ("Debug context.", "Opaque metadata blob from the
+  caller."). A described DOMAIN parameter that happens to be unused ("the
+  folder to search within") is informational (low/low,
+  `evidence.described_domain_param`). The description is the schema's, or —
+  new — the one the source gives the parameter (`ToolDef.doc_param_docs`:
+  the docstring argument section in Google/numpy/Sphinx form, and
+  `Field(description=...)` / `Annotated[..., Field(...)]`), so a Python
+  server scanned statically is no longer always "undescribed"
+  (`side_channel_generic_undescribed` medium vs. `side_channel_generic_
+  described_benign` low).
+  - *Blind spots.* "Domain" is decided by the presence of a content word
+    outside the closed vocabularies, not by understanding it: "Extra
+    metadata for the widget" is domain-shaped because of "widget". Only the
+    generic-name branch is affected; an unambiguous caller-context name
+    (`conversation_history`, `system_prompt`) keeps its own grading.
+- **6 quoted own-parameter without a schema (`crosstool._own_prop_names`).**
+  In quoted-name mode a quoted token is the tool's OWN parameter when it is
+  a schema property, OR a parameter of the tool's own source signature, OR a
+  name its docstring argument section (`Args:` / `Parameters` + underline /
+  `:param x:`) or a `Field(description=...)` documents — so a `**kwargs`
+  handler or a tool whose live schema is empty still knows its own
+  parameters and "you must always use `page_cursor`" is not a redirect
+  (`quoted_own_param_docstring_benign` clean vs. `quoted_sibling_not_own_
+  param` high/medium).
+  - *Blind spots.* The docstring parser is structural (header line, deeper-
+    indented `name: text` entries); a free-prose parameter list without a
+    header is not read.
+- **7 forceful sentence, sibling as the object of ANY verb
+  (`crosstool._sibling_as_verb_object`, `_check_cross_tool_call`).** In a
+  clause with a strong obligation word (must/always/never/mandatory/
+  required) a sibling that is the direct object of ANY verb satisfies the
+  invoke test: the word directly before the sibling (allowing one article/
+  determiner and the word "tool") is the candidate verb; it must not be a
+  closed-class word (determiners, prepositions, conjunctions, pronouns,
+  adverbs, auxiliaries, naming participles "called"/"named") and must stand
+  in verb position itself — clause-initial, or right after a modal / strong
+  word / "to" / "and" / subject pronoun, skipping a closed adverb set — so
+  "must always prefer X", "agents must consult the X tool", "never skip X"
+  are actionable (reason `strong-obligation-word`, `matches[].verb_object`)
+  while "must match the legacy X format" (adjective), "route through X"
+  (preposition) and "the tool named X is required" are not. Actionable tier
+  only: without a strong word the informational tier keeps the closed invoke
+  list (`crosstool_object_of_any_verb` high/high vs. `crosstool_object_of_
+  verb_no_strong_word_benign` clean).
+  - *Blind spots.* No tagger: a noun in verb position ("you must always
+    backup `export_data`") is accepted as a verb — by design, since the
+    forceful frame is what makes it a redirect. Prepositional objects are
+    not covered.
+- **5 sanitizer recognition through expression nesting (`ast-taint`;
+  `pyast._FuncAnalyzer._taint_relative_to_sanitizers`, `visit_Assign`,
+  `_resolve_sink_sanitization`).** `basename`/`shlex.quote` and the path
+  normalizations (`realpath`/`normpath`/`abspath`/`.resolve()`) are
+  recognised ANYWHERE in the expression tree assigned to a name, not only
+  at its top level: `target = os.path.join(BASE, os.path.basename(name))`,
+  `cmd = f"wc -c {shlex.quote(name)}"`, `cmd = "ls " + shlex.quote(p)`,
+  `full = str(Path(BASE, sub).resolve())` (the receiver of a method-form
+  sanitizer counts as inside). The assigned name is stripped when EVERY
+  tainted name in the value reaches it only inside a strip/quote call, and
+  normalized (still needing the prefix guard) when every one reaches it
+  only inside a normalization call. The sink rule is now strict the same
+  way: `SinkRecord.raw_tainted_names` (tainted names reaching the sink's
+  own arguments outside any nested strip call) must ALL be stripped names —
+  a second raw tainted parameter beside a sanitized one
+  (`os.path.join(BASE, sub, os.path.basename(name))`, `f"wc {flags}
+  {shlex.quote(name)}"`) is never sanitized (`sanitizer_nested_assignment_
+  benign` all low/low vs. `sanitizer_nested_partial_bypassed` medium/high +
+  critical/high).
+  - *Blind spots.* A sanitizer applied through an intermediate helper the
+    tool calls (`safe = _clean(name)`) is not a recognised sanitizer. A
+    normalization nested inside the SINK's own argument (`open(os.path.
+    realpath(os.path.join(BASE, name)))`) has no name for a prefix guard to
+    reference and stays unsanitized.
+- **8 capability findings and policy (`ast-taint`, `gate.py`,
+  `policy.example.yaml`).** Every `ast-taint` finding — the taint finding
+  and its `declared-capability` note — whose tool openly declares the
+  capability its sink reaches (the v3-1.1 declaration test: run/execute/
+  invoke + command/shell/script, fetch/download + url/page) now carries
+  `raw.declared_capability: true` (false otherwise); severity and
+  confidence are untouched. New policy key `allow_declared_capabilities`
+  (default false; flat-YAML/JSON, `Policy.to_dict`). When true, the gate
+  (`gate_decision`) returns `confirm` instead of `block` for a high/critical
+  finding that is a declared capability, and the startup audit
+  (`startup_action`) annotates instead of withholding — in both cases only
+  when no UNDECLARED finding reaches the blocking/withhold bar on its own
+  (`worst_rank` over the untagged findings); a declared finding never
+  rescues a call that an undeclared one would block (`declared_capability_
+  policy` critical/high + confirm/annotate under the key vs.
+  `undeclared_capability_policy` critical/high + block/withhold under every
+  policy).
+  - *Blind spots.* The declaration test is the closed verb/object
+    vocabulary of v3-1.1; a capability phrased outside it is simply
+    undeclared (blocked as before). The proxy's annotation text is the
+    generic category warning.
+- **9 JavaScript/TypeScript taint flow, one level (`jsast._js_tainted_
+  locals`, `_sink_records`).** Inside an extracted handler body a local
+  bound by `const`/`let`/`var` (plain, object- or array-destructured) or by
+  a `=`/`+=` assignment from an expression that mentions a handler
+  parameter — or a property of the arguments object (`args.path`,
+  `request.params.arguments.cmd`: the object is the parameter) — is tainted
+  by that parameter; bindings are read in source order, so
+  `const { arguments: toolArgs } = request.params` then `const command =
+  toolArgs.command` taints `command`. A sink whose argument text mentions a
+  parameter or a tainted local is a tainted sink (`tainted_params` = the
+  parameters when reached by name, else the locals, so confidence follows
+  the Python engine: direct high, through a local medium); one that
+  mentions none is a capability fact only. `exec`/`execSync` and any
+  `spawn`/`execFile` call whose arguments carry `shell: true` are shell
+  sinks (critical); `execFile`/`spawn` without it are not. Textual: string
+  concatenation and template literals count as flow; no parser
+  (`js_taint_one_level` critical ×2 vs. `js_taint_constant_local_benign`
+  clean).
+  - *Blind spots.* A mention is a mention: a local that only READS a
+    property of the parameter for a comparison is "tainted" too (over-
+    approximation, never a miss). Flow through a function call's return
+    (`const safe = sanitize(input)`) is tainted — there is no JS sanitizer
+    model. Names shorter than two characters are ignored.
+- **10 writer before reader (`sandbox/argsynth.build_call_plan`).** Already
+  ordered by v3-4.2 from `BehaviorFacts` only (`mutates_module_state` /
+  writes / deletes / accumulates → mutator first, readers next, resetters
+  last, after a one-call reader baseline). This round adds the proof:
+  `plan_order_store_pair` names the reader `a_show_status` and the writer
+  `z_save_note` so alphabetical order would invert them; the plan still
+  runs every writer call before the reader's next call, and the live scan
+  observes the planted note as a bare echo (high/high); the twin
+  `plan_order_independent_stores_benign` (writer and reader on different
+  globals) is ordered the same and surfaces nothing.
+  - *Blind spots.* Pairing is by behavior class, not by the specific
+    global: with several writers and readers the class order is what is
+    guaranteed, not a per-store interleaving. With no source every tool is
+    a reader (alphabetical).
+
