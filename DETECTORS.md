@@ -1580,3 +1580,437 @@ an honest twin (`tests/test_v4_guide.py`).
     guaranteed, not a per-store interleaving. With no source every tool is
     a reader (alphabetical).
 
+## v5 mechanism guide
+The v5 round separates a tool DESCRIBING itself from a description DIRECTING
+the agent, tightens three structure rules to the entity they are about,
+reads every string of a listing entry, and resolves JavaScript descriptions
+held indirectly. Each item ships a malicious fixture that must stay caught at
+its stated grade and an honest twin (`tests/test_v5_guide.py`).
+
+- **1 descriptive voice vs. directive voice (`desc-poisoning` /
+  `schema-poisoning`; `textrules._VoiceCtx`, `analyze_text(voice=...)`).**
+  The exfiltration and secret-store (`read_sensitive`) families key on a
+  verb class plus a destination/store class, and the same verb appears when
+  a tool simply states its own function. A match is now DESCRIPTIVE — kept
+  on `RuleResult.informational`, no score, reported as a low/low
+  `self-description-voice` note (`raw.informational`) — when the family
+  verb is the MAIN verb of its sentence with the tool as implicit subject:
+  third-person singular opening a sentence ("Uploads a file to remote
+  storage", also "Compresses and uploads ..."), a bare imperative opening
+  the description's FIRST sentence ("Post a message to a webhook"), or
+  directly after "this tool" / "it" / "a tool that" (optionally
+  will/can/may). It stays DIRECTIVE (scored exactly as before) when the
+  sentence addresses the agent (you, the assistant/agent/model/LLM),
+  carries an obligation or sequence word (must, always, never, should,
+  also, additionally, then, after, before, first, please, ...), has the
+  family verb appended after another verb phrase as a second action
+  ("... and also send the result to X", ", then emails ..."), or names a
+  sensitive or unrequested object (a secret store anywhere in the clause, a
+  credential word in the sentence, the conversation, the system prompt,
+  "all data", "everything", "entire"). Every other sentence of the same
+  clause that carries a family verb must itself be descriptive or a plain
+  noun use ("the upload URL"), else nothing is downgraded. Sentences are
+  cut on the case-preserved text (terminal punctuation, a label colon, a
+  blank line, a list item); a sentence that starts after a blank line /
+  list marker while the previous line had no terminal punctuation is
+  checked together with that line's tail, so a subject left dangling on the
+  previous line ("The assistant⏎⏎sends ...") is not a sentence start. The
+  voice test runs only when the caller says the text IS a description
+  (`poisoning.py` passes `voice="description"` for the description and
+  `voice="field"` — no opening-imperative shape — for schema fields);
+  response text, source literals and decoded (hidden) segments are never
+  discounted (`voice_directive_exfil` high/high ×4 + high/medium vs.
+  `voice_descriptive_benign` low/low ×6).
+  - *Secret-store family.* The store is that family's own trigger, so the
+    "sensitive object" marker cannot separate "Load environment variables
+    from a .env file" from "Read ~/.ssh/id_rsa" when both open a
+    description as a bare imperative — the one descriptive shape that is
+    word-for-word a directive. That shape is accepted only when the tool's
+    OWN NAME carries a token of a store the sentence names (`load_dotenv`,
+    `get_wallet_balance`, `printenv`): the capability must be declared in
+    the identifier the agent selects the tool by. A conjunct after the read
+    verb counts as a second action unless it is a result verb (return,
+    output, print, report, list, show, ...) or a noun coordination; the
+    store-then-outbound pattern is descriptive only for return/output/
+    print/report, never for send/forward/include/attach. Calibration
+    ignores an informational note when corroborating poisoning across
+    evidence locations.
+  - *Blind spots.* Voice is the author's choice: a tool that DECLARES in
+    third person that it uploads data to a hard-coded URL is informational
+    here — the description no longer hides anything, and the behavior
+    itself is the business of the taint / response / canary detectors. The
+    directive markers are token tests over the sentence, so honest sentences
+    containing "first", "after", "you" stay actionable (the pre-v5 grade).
+    No tagger: a plural noun opening a sentence ("Posts from the remote API
+    ...") reads as a third-person verb, which only ever yields the
+    informational grade an honest noun phrase deserves. The opening
+    imperative is recognised only as the very first sentence; a description
+    that starts with a title line keeps the pre-v5 grade.
+
+- **2 third-party pair (`cross-tool-redirect`; `crosstool._check_third_party_
+  pair`).** A description's only authority is over its own tool. A clause
+  that names TWO distinct tools, neither of which is the tool being
+  described, and relates them to EACH OTHER is an instruction about other
+  tools' flow: actionable (high/high, reason `third-party-pair`, evidence
+  `anchor` → `sibling`) even with a weak modal or a bare sequence word.
+  Structure only: one reference is ANCHORED — directly governed by a
+  sequence/condition word (before, after, prior to, when(ever), while, once,
+  until, upon, if, every/each/any time, as soon as, following) with at most
+  four words in between, no clause punctuation and no self pronoun — and a
+  DIFFERENT reference is PRESCRIBED — not anchored, and the object of an
+  invoke verb (the word directly before it, allowing a determiner, the word
+  "tool" or "a call to") or the subject of a passive invoke ("B should be
+  run"). The clause must also carry a sequence or obligation word. A
+  reference coordinated with an anchored one ("before using A or B") is
+  anchored too, so two siblings in the same role never pair. Tool
+  references are co-listed siblings, or quoted tool-identifier-shaped
+  tokens that are neither the described tool's own name nor one of its own
+  parameters (a pair with a quoted member is high/medium, like the
+  quoted-name mode). A clause that relates one sibling to the described
+  tool itself ("before using this tool, call A and B", "use A or B first")
+  keeps the two-tier grading (`crosstool_third_party_pair` high/high ×2 vs.
+  `crosstool_pair_self_related_benign` low/low workflow references).
+  - *Blind spots.* An unanchored chain ("first call A, then call B") is not
+    a pair — it is word-for-word the honest "how to prepare for this tool"
+    advice — and keeps the two-tier grading. A single-word sibling name
+    still needs quoting or the word "tool" to count as a reference. A
+    help/usage-guide tool that documents the flow between two other tools
+    of its own server is graded like any other third-party pair.
+
+- **3 a strong word escalates only as an obligation on a CALL of the sibling
+  (`cross-tool-redirect`; `crosstool._strong_word_governs` =
+  `_strong_word_object_test` or `_strong_word_chain`, passed to
+  `_actionable_reason(strong_governs=...)`).** A strong obligation word
+  (must / always / never / mandatory / required) anywhere in the clause
+  used to escalate any sibling reference that shared the clause with an
+  invoke verb. It now escalates on one of two routes, both structural (no
+  tagger, closed generic vocabularies):
+  - *Object test (item-3 refinement).* The first version was an ORDERING
+    test — strong word, then the invoke verb, then the sibling — and
+    demoted forceful redirects with another verb on the way to the call
+    ("you must first verify the account by calling X", "always make sure to
+    run X") or with the call first ("calling X before answering is
+    mandatory"). The object test asks what the sibling is in the clause;
+    the position of the strong word does not matter.
+    - *Call site.* The sibling is the DIRECT OBJECT of an invoke verb: the
+      verb stands immediately before the name, with only an article /
+      determiner / the word "tool" or "function" / a quote character in
+      between (a sibling coordinated with such an object, "call A and X",
+      and the nominal "make a call to X" count too). Or the sibling is the
+      SUBJECT of an obligation passive ("X must be called", "X is to be run
+      first"; a plain passive only under an "ensure" head — "make sure X is
+      called", "it is mandatory that X is run"). A sibling that is only
+      inside a prepositional, participial or relative phrase ("the value
+      used IN X", "is required BY X", "the id returned BY X must be passed
+      here", "what X produced") has no call site: informational.
+    - *The call is prescribed.* Not somebody else's ("so the server can
+      call X"), and not the circumstance, purpose, comparison or provenance
+      of something else: an invoke verb heading a "when / while / if / for
+      / as / than / of ..." adjunct, a purpose infinitive ("TO use X, you
+      must ...", "the access needed TO call X", "in order to call X"), or a
+      "by / after calling X" hanging off a noun-modifying participle ("the
+      one OBTAINED by calling X"; "must BE VERIFIED by calling X" is the
+      main verb and counts). A call after "before / until / unless / prior
+      to" is a prerequisite only under a negated agent obligation ("never
+      answer before calling X", "you must not reply until you have called
+      X") — "the report id is required before calling X" is not.
+    - *Same finite clause.* A subordinator, relativizer or coordinator that
+      opens a clause with its own subject ("before you call X", "when the
+      token is required", "the one you used to call X", "..., which must
+      ...", "... and you can call X", "so that ...") and a parenthesis put
+      what they open out of the strong word's reach, up to the next
+      punctuation mark. The strong word reaches into one kind of clause: a
+      prerequisite clause of its own ("... only after you have called X").
+    - *What the strong word says.* "must" reaches a call anywhere after it;
+      across punctuation only when its subject is the agent ("you must,
+      ..., call X" — not "the id must be valid, use X to find one").
+      "always" / "never" do the same unless they describe behaviour (a
+      third-person verb: "always returns ..."; a state: "the id is always
+      ...") or the absence of an obligation ("never need to ..."). After
+      the call, "must" needs the call or an anaphor as its subject
+      ("calling X must happen first"), or the agent with a back-reference
+      ("call X - you must not skip this"); "always" / "never" must trail
+      the call ("call X first, always") or sit in an obligation predicate
+      about it ("calling X is always the first step"). "required" /
+      "mandatory" are adjectives and need a link to the call: a complement
+      ("required to ...", "mandatory that ...", a "Mandatory step:" label)
+      with an agent / expletive subject, or a predicate whose subject is
+      the call ("calling X before answering is mandatory", "run X first -
+      this step is required"); negated ("is not required") they state no
+      obligation.
+  - *Direct chain (the original ordering test, kept as the second route).*
+    Strong word → its GOVERNED SLOT → the sibling. The governed slot is the
+    first word after the strong word that is not transparent (a closed set
+    of adverbs, "to", "be", "not", "that", an agent subject, any -ly
+    adverb); it must be the invoke verb (or, on the v4-7 route, the very
+    verb whose direct object is the sibling). An adjunct up to the next
+    comma ("must, before answering, call X") and, after required/mandatory,
+    a short label up to a colon or dash are stepped over. Between the
+    governed verb and the sibling there may be no finite auxiliary/modal,
+    and the sibling may not be a provenance or comparison object ("the id
+    returned BY X", "the output OF X", "unlike X"; "instead of X" is not
+    provenance). Passive ("X must always be called first") and predicate
+    ("X is required") orders are accepted. It is kept because it is the
+    only route for a sibling that follows the governed invoke verb as a
+    COMPLEMENT rather than as its object — "must use this tool INSTEAD OF
+    X", "this tool must be used BEFORE X" — so nothing the first version
+    of item 3 escalated is demoted by the refinement.
+  The v4-7 "object of any verb" route keeps the direct chain only (its verb
+  list is open). The other forceful reasons (threat of failure, sensitive
+  target, tamper verb with a literal, conditioning on the other tool,
+  third-party pair) are unchanged, and `param-tampering` keeps its own
+  strong-word test (its verb is a tamper verb). Applies to the sibling and
+  the quoted-name mode. Fixtures: `crosstool_strong_word_governs` high/high
+  ×3 vs. `crosstool_strong_word_other_verb_benign` low/low ×3 (direct
+  chain); `crosstool_strong_word_object_call` high/high ×5 vs.
+  `crosstool_strong_word_object_phrase_benign` low/low ×4 (object test).
+  - *Blind spots.* The clause model is punctuation-bound: a finite
+    sub-clause with no closing comma between the call and a later strong
+    predicate ("calling X before you answer is mandatory") hides the
+    predicate, and a sub-clause with a noun subject after "before / after /
+    until" is not seen as a clause. A strong word in a separate sentence or
+    after a semicolon ("Call X first. This is mandatory.") is another
+    clause. A trailing tag ("call X first (mandatory)") is not read. "Use
+    of X is mandatory" has no call site (the sibling is inside an "of"
+    phrase). An obligation with a non-agent subject does not carry across
+    punctuation ("the request must be confirmed first: call X"). An honest
+    prerequisite phrased as an order to call ("you must first obtain a
+    token by calling X") is forceful by construction. "Must use the output
+    of X" is read as provenance although it implies X was called; a
+    sensitive sibling name still escalates it. Every vocabulary is a closed
+    list.
+
+- **4 output substitution (`output-substitution`, new detector id in
+  `detectors/crosstool.py`; shape in `textrules.output_substitution_hits`).**
+  A description may say what its tool returns; it has no authority over
+  what the agent then does with ANOTHER operation's data. The rule needs two
+  instructions together, in the same clause or adjacent clauses (the
+  substitution at most two clauses after / one before the sequencing):
+  - (a) *sequencing* — an invoke verb whose object is the described tool
+    ("call this tool", "run it", its own name), or the tool as a passive
+    subject ("this tool must be called", a subjectless "Must be called
+    ..."), together with a sequence word (before, after, prior to, first,
+    then, once, whenever, every time, ...);
+  - (b) *substitution* — a base-form directive to replace / overwrite /
+    substitute / swap / override an operation-data object (values, inputs,
+    arguments, parameters, operands, numbers, result, answer, ... or a
+    pronoun for them) WITH the tool's output; to use / pass / return the
+    tool's output INSTEAD OF the original; or to use the tool's output AS
+    THE FINAL / ACTUAL result. (b) with the output named as the tool's own
+    ("its response", "this tool's output") plus a sequence word in that
+    clause also satisfies (a).
+  Grade: medium/medium on its own; high/high when either clause carries a
+  strong obligation word or names a co-listed sibling (`evidence.reasons`,
+  `named_siblings`). Not affected: a third-person "Replaces the values with
+  ..." (the tool's own function), "Returns the corrected value", honest
+  chaining that supplies an input and replaces nothing ("call this first,
+  then pass the returned id to X"), and a replace verb whose object is text
+  (`output_substitution` medium/medium + high/high ×2 vs.
+  `output_substitution_returns_benign` clean).
+  - *Blind spots.* The data-object and output vocabularies are closed
+    lists; a substitution phrased without them ("put what you get back
+    where the numbers were") is missed. The two parts must sit within the
+    clause window, so a long description that separates them is missed.
+    Matching runs on the raw text like the other structure rules, so the
+    unicode-obfuscated form is left to `desc-obfuscation`.
+
+- **5 planning directives in responses (`response-injection` /
+  `response-redirect` / `static-response-poisoning`;
+  `response.planning_directive_clauses`).** A response is data the agent
+  asked for. A response CLAUSE that carries (i) an obligation (must, should,
+  shall, always, need to, have to, required, mandatory, make sure, remember
+  to — or the passive "X must be called"), (ii) an invoke-class verb (call,
+  invoke, run, execute, trigger, use, add, include, insert — also "add a
+  call to X") whose OBJECT is a tool-shaped identifier, and (iii) a
+  reference to the agent's plan ("to/in your plan", "update your plan",
+  "execution plan"), its next step ("next step/action", "as your next",
+  "before you respond / before responding / before answering", "then
+  respond") or the user's request ("the user's request / query / task",
+  "what the user asked") is the response writing the agent's plan for it:
+  actionable high/medium whether or not the named tool belongs to this
+  server.
+  - A directive naming one of the server's OWN tools is reported by
+    `_run_injection` (`response-injection`, method
+    `response-planning-directive`, `evidence.own_tool`); one naming a tool
+    the server does not list is `_run_response_redirect`'s third trigger
+    (`trigger: planning-directive` — its call-verb list has no "use", and
+    add/include/insert reach it through the plan reference). The static
+    twin (`staticresponse.py`) runs the same clause test over every
+    hard-coded returned literal and reports `static-response-poisoning`
+    high/medium for either kind of tool.
+  - The identifier is tool-shaped when it is a listed tool name, a
+    snake_case token, or a quoted / "... tool"-suffixed kebab-case or
+    camelCase token; a single-word tool name counts only when quoted or
+    followed by "tool". A token that is a parameter of the responding tool
+    (its schema, source signature, or the call's own argument keys) is a
+    field name and never counts.
+  - Stays clean: a mention with no obligation ("you can also call
+    export_rates"), an honest precondition error (obligation + own tool but
+    no plan / next-step / user-request reference: "you must call
+    start_session first"), pagination guidance ("use next_cursor in the
+    next call"), a next-step hint that names no tool.
+  - A retrieval tool proven by data flow (source returns what it read, or
+    replays with a different URL/path differ AND the clause is absent from
+    one of them) keeps the annotate-not-block rule: low/medium
+    `untrusted-content-annotation`. A prompt template (`prompts/get`) is
+    exempt from the own-tool case: sequencing the server's own tools is
+    what a prompt is for (a foreign tool there is still a redirect)
+    (`response_planning_directive`: 2 × `response-injection` + 1 ×
+    `response-redirect` high/medium, 3 × `static-response-poisoning`
+    high/medium vs. `response_planning_directive_benign` clean in both
+    phases).
+  - *Blind spots.* The plan / next-step / user-request vocabulary is a
+    closed list ("before continuing", "to complete this request" are
+    deliberately out: they are the wording of honest precondition errors).
+    A bare, unquoted single-word or kebab-case tool name is not recognised.
+    A directive split across two clauses (obligation in one, tool in the
+    next) is missed.
+
+- **6 every string of a listing entry (`desc-poisoning` / `schema-poisoning`
+  / `desc-obfuscation`, `cross-tool-redirect` / `param-tampering` /
+  `output-substitution`; `context.listing_entry_strings`).** The
+  description rules used to read two places: `description` and the
+  `description` of each top-level input-schema property. An agent is shown
+  the whole entry. `contract_from_listing` now keeps the raw entry
+  (`ToolContract.raw_entry`), and `listing_entry_strings` walks every string
+  value at any nesting depth — annotations, titles, examples, output-schema
+  descriptions, enum descriptions, defaults, `_meta`, vendor / extension
+  fields, nested input-schema descriptions, prompt argument descriptions —
+  yielding `(json_path, text, standard)`. `poisoning.py` runs the family
+  rules over each (`voice="description"` for a `title`, which is the
+  entry's one-line function statement; `voice="field"` for everything
+  else) and `crosstool._texts_for` feeds each to the cross-tool, parameter-
+  tampering, third-party-pair and output-substitution rules. The JSON path
+  is the evidence (`evidence.json_path`, `field_class`; also the dedup
+  discriminator, so two fields of one tool are two records).
+  - *Grade.* A STANDARD description slot — a `description` anywhere inside
+    the input schema, or a prompt argument's `description` — keeps the full
+    grade. A hit in any other field is ONE CONFIDENCE STEP LOWER than the
+    same hit in `description` (`raw.ungraded_confidence` keeps the original):
+    a decisive family is high/medium (still actionable), a high/medium hit
+    becomes high/low, a medium/medium hit becomes medium/low. Evidence
+    location is `schema` under the input/output schema, `description`
+    elsewhere. Calibration's cross-location corroboration still applies.
+  - *Skipped.* The entry's identity (name / uri), the text already read as
+    the description or as a top-level property description, any string
+    repeated elsewhere in the entry (reported once), and strings under 12
+    characters or without whitespace (no sentence fits). Outside a standard
+    slot only a mechanism family fires — an example or default may honestly
+    carry an encoded sample payload, so the bare "contains an encoded blob"
+    score does not — and only zero-width / bidi characters are reported as
+    `desc-obfuscation` (high/medium). No informational self-description
+    note is emitted for these fields.
+  - *Static twin.* A static scan has no live listing, so the registration's
+    own keyword arguments stand in for the entry (`ToolDef.listing_entry`):
+    Python decorator keywords (`title=`, `annotations={...}` /
+    `ToolAnnotations(...)`, `meta=`, schema literals) and low-level
+    `Tool(...)` / dict-literal fields, with string constants resolved like a
+    description; in JS/TS the `registerTool(name, {...}, cb)` config object,
+    a positional annotations object of `tool(...)` (recognised by a `title`
+    or a `*Hint` key) and the low-level descriptor object, read through the
+    item-8 evaluator. This also gives low-level Python tools their
+    input-schema property descriptions, which the static path never read
+    (`listing_fields_poisoned`: 5 non-standard fields high/medium, 1 nested
+    schema description high/medium at full grade, 1 medium-grade title
+    medium/low vs. `listing_fields_benign` clean; live and static).
+  - *Blind spots.* The step-down is keyed on WHERE the author put the text,
+    which the author chooses: a medium-grade mechanism (self-promotion, a
+    lone secret-store read) moved from the description into a title or a
+    vendor field is reported but no longer actionable on its own — the
+    price of not flagging every loosely worded example string. JSON keys
+    are not read, only values. At most 300 strings per entry are read. The
+    static twin reads literal / statically resolvable registration
+    arguments only; fields a server computes at runtime are read from the
+    live listing. `tool-shadowing` still reads the name and description
+    only.
+
+- **7 shadowing needs a tool-shaped or server-shaped object
+  (`tool-shadowing`; `identity._shadow_assertion`, `_entity_in_phrase`).**
+  The identity-assertion rule used to accept a shadow verb followed within
+  40 characters by ANY quoted token, or by "the original <anything>" —
+  "replaces the original text with ...", "replaces every "TODO" marker",
+  "overrides the `Content-Type` header" all fired. It now looks at the
+  verb's OBJECT — the noun phrase right after the verb (cut at the first
+  preposition, conjunction, auxiliary or punctuation; the noun form takes
+  it after "for" / "of": "a drop-in replacement for X"), the SUBJECT of a
+  passive ("X is superseded by this one", "X, now replaced by this one";
+  skipped when the agent is something other than the described tool: "`a`
+  is replaced by `b`"), or
+  the ANTECEDENT of a pronoun object ("the calendar server is slow, so this
+  tool replaces it") — and fires only when that phrase is an entity:
+  1. a co-listed sibling tool, or a quoted tool-identifier-shaped token
+     that is not one of the tool's own parameters / enum values and is not
+     labelled as a parameter by an adjacent value word ("the `max_items`
+     setting");
+  2. a naming token followed by "tool", "server", "function", "command",
+     "API" or "integration" as the HEAD of the phrase ("the filesystem
+     server", "the `git` tool"), or "another / other tool|server|...". The
+     token may not be a determiner or a generic adjective (closed list:
+     default, current, selected, built-in, ...), the phrase may not carry a
+     self-versioning word (old, previous, legacy, deprecated, existing,
+     v2, ...) — the tool's own predecessor — nor "default";
+  3. "the official / real / original / genuine / authentic / legitimate X"
+     where X is not a value-class noun (text, value, path, file, mode,
+     setting, ...; closed list).
+  "act as the/a ..." accepts only kinds 1 and 3 (and "another tool"): its
+  object is routinely a role ("acts as a REST API client"). The `SELF_REF`
+  veto (in this server / its own / itself) and the duplicate-name and
+  handshake-identity checks are unchanged; grade stays high/medium
+  (`evidence.entity_kind`, `entity`, `verb`) (`tool_shadow_entity_object`
+  high/medium ×4 — the "filesystem server" and the pronoun-antecedent shapes
+  were not caught before — vs. `tool_shadow_value_object_benign` clean; the
+  older `tool_shadow`, `tool_shadow2` still fire and `benign_multitool`,
+  `benign_multitool2`, `tool_shadow_own_param_benign` stay clean).
+  - *Blind spots.* A quoted proper name that is not identifier-shaped
+    ("claims to be "CloudSync Official"") is no longer an entity on its
+    own. "Command", "function" and "API" are also ordinary value nouns, so
+    "replaces the grep command" reads as an entity while a generic-adjective
+    object is not — the token lists are closed. A quoted snake_case setting
+    name that is neither one of the tool's parameters nor labelled as a
+    setting still reads as a tool identifier. The object phrase is cut at
+    the first preposition, so an entity buried in a prepositional phrase
+    ("replaces calls to X") is missed.
+
+- **8 JavaScript / TypeScript descriptions held indirectly
+  (`analysis/jsast.py`: `_JsEnv`, `_js_eval_expr`, `_resolve_js_string_
+  expr`).** The JS/TS extractor read a description only when it was a
+  string literal, a `+` chain of literals, or an identifier bound earlier
+  in the file to such a string. A description — or a zod `.describe(...)`
+  / JSON-schema `description:` text — is now resolved through a small
+  static evaluator when it is: an identifier; a property of a constant
+  object (`TEXTS.search`, `TEXTS["search"]`, nested, through
+  `Object.freeze({...})` / `as const`); a template literal with `${CONST}`
+  / `${TEXTS.x}` parts (tagged templates such as `dedent` are read as
+  plain templates); an array `.join(sep)` (inline or a named array); a
+  concatenation across constants; with `.trim()` / `.concat()` and
+  parentheses. Bindings (`const` / `let` / `var`, with an optional TS type
+  annotation, anywhere in the file, in any order) are evaluated lazily and
+  at most TWO HOPS of bindings are followed. An operand that is not
+  statically a string (a function call, an imported name, a third hop)
+  contributes nothing and the literal text around it is still read — the
+  same rule the Python side applies to an f-string's literal wrapper.
+  Comments inside object / array literals are stripped before splitting (a
+  comment's apostrophe used to open a phantom string), and string escapes
+  are decoded (`\n` is a newline, not the letter n). The low-level
+  descriptor's schema properties are read through the same evaluator, top
+  level only — a nested object's keys are no longer mistaken for
+  parameters; nested descriptions are reached as item-6 listing strings
+  (`js_indirect_desc`: 5 × `desc-poisoning` high/high, 1 ×
+  `cross-tool-redirect` high/high, 1 × `schema-poisoning` high/high vs.
+  `js_indirect_desc_benign` clean, with every description resolved to its
+  full text).
+  - *Blind spots.* Still no JS parser: property assignment after the
+    declaration (`TEXTS.search = ...`), `Object.assign` merges beyond the
+    last argument, spreads, computed keys, class fields, enums, imports
+    from another file and anything produced by a function call are not
+    followed. A third hop of bindings is dropped by design. A regex literal
+    containing an unbalanced bracket or quote inside a call argument can
+    end a scan early.
+- **Round-wide: malformed listing entries.** `contract_from_listing` falls
+  back to an empty description / schema when the entry's `description` is
+  not a string or its `inputSchema` is not an object (one such entry used to
+  raise inside `cross-tool-redirect`, `param-tampering` and
+  `server-identity` and cost the whole server those detectors); whatever
+  strings the malformed fields hold are still read through the item-6 walk
+  of the raw entry, as non-standard fields.
+
