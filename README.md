@@ -140,3 +140,15 @@ decision on `raw.gate_decision`. See **DETECTORS.md** for one entry per detector
 including its known blind spots, and **ARCHITECTURE.md** for how the layers fit
 and how to add a detector.
 
+## Known limitations (v1)
+
+- **Source analysis is Python-first.** Node/TS servers get manifest + install-hook
+  + dynamic coverage, but source taint is Python-only in v1 (JS is regex-lite).
+- **Taint is intra-procedural.** Flows through helper functions/classes across the
+  module are approximated, not fully tracked.
+- **The proxy fronts exactly one downstream server** (v1 scope; multi-server
+  namespacing is structured for but not built).
+- **The live proxy's elicitation round-trip and forwarding of downstream-initiated
+  requests are best-effort.** All gate/audit/diff/response logic is fully exercised
+  by `proxy-eval`, which is what the offline evaluator scores.
+- Without Docker, dynamic detectors are skipped (reported, not silent).
