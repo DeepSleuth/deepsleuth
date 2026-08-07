@@ -22,7 +22,7 @@ there is a *positive* signal:
    check").
 2. **The declared contract explicitly promises authorization, but no signal of
    any kind exists in the body** (``auth-gap``). Only fires when the
-   tool description/name itself claims a requirement ("requires authorization",
+   description/name itself claims a requirement ("requires authorization",
    "admin only", ...) — i.e. a real declared-vs-implemented contradiction — not
    on the mere shape of the tool (destructive-sounding name, no visible check).
 3. **audit-gap** mirrors this for logging: only fires when the description
