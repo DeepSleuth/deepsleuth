@@ -159,7 +159,7 @@ def _run(ctx: ScanContext) -> List[Finding]:
 
 register(Detector(
     id="auth-gap", category="auth-misconfiguration", evidence_location="source",
-    phase="tool listing", run=_run, requires={CAP_SOURCE},
+    phase="listing", run=_run, requires={CAP_SOURCE},
     rationale=("Absence of a visible check is not itself evidence of a "
                "vulnerability — it is what every legitimately-unauthenticated "
                "utility tool looks like. We only report a *positive* "
