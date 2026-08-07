@@ -2014,3 +2014,168 @@ its stated grade and an honest twin (`tests/test_v5_guide.py`).
   strings the malformed fields hold are still read through the item-6 walk
   of the raw entry, as non-standard fields.
 
+## v6 mechanism guide
+The v6 round closes seven weaknesses found after v5. Every item is additive
+(no existing detection was weakened or removed), reuses the calibration layer,
+defaults a NEW rule to medium confidence, and ships a malicious fixture plus an
+honest twin. Shared static infrastructure: `analysis/constfold.py` (safe
+constant folder), `analysis/envdump.py` (whole-environment flow),
+`analysis/crossmodule.py` (same-directory import index),
+`analysis/buildbackend.py` (PEP 517 backend facts).
+
+- **W1 conditional data-supersession (`desc-poisoning` / `schema-poisoning`;
+  family `data_supersession`, `textrules.data_supersession_hits`).**
+  *Phase: listing.* A description may say what its tool returns; it has no
+  authority over data the tool does not own. The family fires when, in the
+  same or an adjacent sentence of a DESCRIPTION (only when `voice` is set —
+  response text and source literals are never scanned for it), (a) data is
+  cast as stale / outdated / untrustworthy and (b) the agent is DIRECTED
+  (addressee + modal, `must be replaced`, a mid-description imperative,
+  `always overwrite ...`) to replace / discard / override / supersede it with
+  values from a NAMED ROUTE (a snake_case tool name, a backticked name, or
+  "this tool's output"), usually conditionally ("if they differ ..."). A
+  soft verb (`use`, `trust`, `prefer`) counts only with `instead` / `in place
+  of` / `rather than` / `source of truth`. Weight 3 = medium severity /
+  medium confidence alone; the existing cross-evidence-location calibration
+  lifts it when the same tool is poisoned in a second surface.
+  `data_supersession_directive` ×3 medium/medium vs. `data_supersession_benign`
+  clean. *Honest twins that stay silent:* a config reader ("reads the config
+  file and returns the current values"), a usage hint ("use read_note to read
+  a file"), a tool describing its OWN cache ("clears this tool's cache so
+  stale entries are refreshed"; third person, own state), a bare opening
+  imperative of the first sentence (the v5-1 voice rule), a negated form
+  ("never replace"), and a credential / session lifecycle ("if the session
+  token expired, discard it and use the token returned by refresh_token").
+  - *Blind spots.* A route that names no concrete source (no filename, no
+    quoted / parenthesised identifier, no "the <X> note/file/config/..."
+    construction: "the weather service" alone) is not matched;
+    a credential/session/cursor/lock word anywhere in the sentence vetoes it
+    (an attacker can try to hide behind that vocabulary, which is why
+    credential routing stays with the other families); the match is lexical
+    English.
+
+- **W2 state drift is content-analyzed (`rugpull-runtime`,
+  `detection_method=response-diff-instruction`; `textrules.
+  instruction_shift_hits`).** *Phase: multicall.* When an identical repeated
+  call drifts, the text the drift INTRODUCED (clauses of the later response
+  absent from the first once numbers/timestamps/ids are stripped) is run
+  through (1) the drift-scoped instruction-shift matcher — mode announcement
+  ("you are now ...", "maintenance mode"; 2), user override ("ignore the
+  user"; 3), addressee + obligation + action verb ("you should send ...";
+  3), clause-initial action verb on a path/URL/shell artifact (1), firing at
+  ≥3 —, (2) the response-injection grading (`response._grade_response`) and
+  (3) the planning-directive clause matcher. A hit escalates the old
+  low/low "state-dependent behavior" note to `prompt-injection`,
+  `evidence_location=multi-call-state`, high severity / MEDIUM confidence,
+  carrying the drift excerpts, the matched signals and any source-visible
+  gate (`evidence.source_gates`). Calibration raises confidence to high when
+  the same tool's source gates on a call counter / time / env toggle
+  (`raw.source_gate`). The pre-existing `new_mech` branch is untouched.
+  Plain drift (counters, pages, timestamps, declared state) still lands as
+  the low/low note (`state_drift_declared_benign`: its description declares
+  the cursor/counter dependence). `state_drift_instruction` high/high (gated).
+  - *Blind spots.* Needs ≥2 identical calls (the call plan supplies them);
+    an injection that was present from the first response is not a drift and
+    stays with `response-injection`; the matcher is English-lexical and
+    deliberately narrow.
+
+- **W3 whole-environment serialization (`environ-dump`, new; `analysis/
+  envdump.py`).** *Phase: listing (source).* The dynamic child environment has
+  no canary, so only the source shape can see it. A tool body that RETURNS the
+  whole `os.environ` — directly, copied (`dict(os.environ)`,
+  `.copy()`), through an `.items()` loop that builds the response, a
+  comprehension copy, `json.dumps`/`str()` of it, an alias (`from os import
+  environ`, `import os as o`), a local helper, or a one-hop helper call — is
+  `information-disclosure`, `evidence_location=source`. Undeclared: high
+  severity / medium confidence, raised to high by calibration when the tool
+  carries a description that never mentions the environment
+  (`raw.description_mismatch`). If the description declares it deals in the
+  environment, the finding is the declared-capability lane (low/low,
+  `detection_method=declared-capability`), never graded. Single reads
+  (`os.environ.get(name)`, `name in os.environ`), the environment handed to a
+  child process (`subprocess.run(..., env=dict(os.environ))`), a constant-key
+  subset, and an environment that never reaches a `return` are clean.
+  `environ_dump_whole` ×4 high/high vs. `environ_dump_single_benign` clean,
+  `environ_dump_declared_benign` low/low.
+  - *Blind spots.* Python only (no `process.env` rule for JS tools); a
+    prefix-filtered view (`startswith("APP_")`) is treated as a partial view
+    and not flagged, so a filter that happens to be `""` is missed; an
+    environment smuggled through `globals()`/pickling, or serialized in
+    another process, is not followed.
+
+- **W4 configured-vs-served identity (`server-identity`,
+  `detection_method=config-identity-mismatch`; `Target.config_entry`).**
+  *Phase: listing (needs the live handshake).* The mcp.json entry key is
+  recorded on the `Target`; when the handshake's `serverInfo.name` shares no
+  normalized substring and no non-generic token with it, a low-severity
+  `tool-shadowing` finding is emitted with medium confidence (low when the
+  package's own manifest name matches the handshake — an ordinary alias key).
+  Never actionable alone (a soft signal; `colliding_key` keeps it distinct
+  from the authority-claiming check). A source directory, single file or raw
+  launch command has no config entry and is never compared.
+  `config_identity_mismatch` vs. `config_identity_match_benign`.
+  - *Blind spots.* Static-only scans have no handshake; a drop-in that
+    also copies the configured name is invisible (that is what the identity
+    pin is for).
+
+- **W5 local build backend (`supply-chain`,
+  `detection_method=pyproject-backend-scan`; `analysis/buildbackend.py`).**
+  *Phase: listing (package).* The existing low `backend-path` note is kept.
+  The `[build-system]` table is parsed (`tomllib`, regex fallback), the
+  in-tree backend module resolved under each `backend-path` dir, and its
+  source (plus same-directory imports, two hops, cycle-safe) analyzed as an
+  `install-time-script`: a credential-shaped path read (incl. a path assembled
+  with `os.path.join`/`Path / ".ssh"`) or decode+exec → high/high
+  (`dangerous_shape`); network call + exec → high/high; network alone →
+  high/medium (installers have no need to reach the network); an exec sink
+  (`eval`/`exec`, `os.system`/`popen`, `subprocess` with `shell=True` or a
+  shell/downloader argv[0]) alone → medium/medium. A backend that only builds
+  (delegating to setuptools, constant-argv `subprocess.run(["gcc", ...])`,
+  writing a version file, encoding with base64) stays at the low note.
+  `build_backend_malicious` high/high vs. `build_backend_benign` low note.
+  - *Blind spots.* A backend outside the scanned tree or in a package
+    directory the loader did not collect; a backend that `exec`s code fetched
+    by a third-party dependency; a constant-argv `subprocess` that runs a
+    downloaded binary.
+
+- **W6 chr()-assembled constant strings (`static-response-poisoning` via
+  folding; `const-string-assembly`, new; `analysis/constfold.py`).**
+  *Phase: listing (source).* (a) A safe constant folder (no `eval`, step
+  budget) evaluates `"".join(chr(c) for c in (..))`, `chr(a)+chr(b)+...`,
+  `bytes([...]).decode()`, `map(chr, [...])`, loop-appended `chr`, and chains
+  through module/local constants. The folded literal flows wherever a
+  literal flows: a tool's returned strings (graded by `static-response-
+  poisoning` exactly like a written literal) and a decorator `description=`
+  (graded by `desc-poisoning`). (b) `const-string-assembly` reports the
+  assembly itself when ≥4 characters of a RETURNED or COMPARED string are
+  built from chr/bytes of constants: low severity / medium confidence for a
+  benign-looking result, medium severity when the folded text carries an
+  agent-directed family. The distinguishing feature is CONSTANTS: `chr`/`ord`
+  on caller input (Caesar shift, a code-list decoder), a `range()` alphabet, a
+  single `chr(10)`, and standard codecs (`base64`) never fold and are never
+  reported. `chr_assembly_poison` vs. `chr_assembly_benign` (clean).
+  - *Blind spots.* Strings built from non-constant table lookups, `eval`'d
+    source, or a folded value computed from `os.environ`/files are not
+    folded; a chain shorter than 4 characters is ignored; hex/`\x` escapes
+    spelled in the literal are plain literals and were already scanned.
+
+- **W7 cross-module laundering (`analysis/crossmodule.py`;
+  `static-response-poisoning`, `ast-taint`, `environ-dump`,
+  `const-string-assembly`).** *Phase: listing (source).* When a tool body is
+  resolved for the static response / sink / env-dump / chr rules, calls into
+  same-directory local modules (`import _gate`; `from _gate import f`;
+  `from . import x`; aliases) are followed through one or two import hops
+  (cycle-safe, capped function count): returned literals, W6-folded strings,
+  taint sinks (via the inliner's callee registries) and whole-environment
+  dumps found in the imported helper are attributed to the tool, and a module
+  constant imported from a helper (`from _notes import NOTICE`, itself
+  imported from `_texts`) resolves. `evidence.via` carries the
+  `module::function` breadcrumb. Third-party / stdlib imports, modules in
+  other directories and a third hop are never followed.
+  `cross_module_directive` (5 findings across 5 tools) vs.
+  `cross_module_helpers_benign` (clean: formatting helpers, a constant-argv
+  subprocess, a single env var).
+  - *Blind spots.* Dynamic imports (`importlib`, `__import__`), packages
+    resolved off `sys.path`, `from pkg import *` of non-function names, and
+    helpers more than two import hops away.
+
