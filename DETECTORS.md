@@ -2179,3 +2179,62 @@ constant folder), `analysis/envdump.py` (whole-environment flow),
     resolved off `sys.path`, `from pkg import *` of non-function names, and
     helpers more than two import hops away.
 
+### v6 follow-ups (2026-10)
+
+- **Call-plan depth is gate-aware (`sandbox/argsynth.build_call_plan`;
+  `BehaviorFacts.counter_gate_thresholds`; `crossmodule.scan_counter_gates`).**
+  *Dynamic call plan, both frontends.* W7's cross-module merge correctly makes
+  a tool that delegates to a mutating helper a `mutator`, which drops the rule 0
+  reader-baseline call; a counter-gated dormant tool with threshold 8-9 then
+  got ~7-8 identical calls and never tripped dynamically, so the response-diff
+  detectors could not see the flip. The merged facts now also carry the
+  numeric thresholds of every call-counter-shaped comparison (`if _calls >=
+  10`, `==`, `>`, `<`; the tool's own body AND every function reachable
+  through same-module helpers / local imports at any hop, zero-argument
+  helpers included). For each such tool the plan APPENDS identical calls
+  (after the rules 3.2/3.3 variant tail, so burst/pass pairing is untouched) up to
+  `threshold + 3` identical calls, capped at 24 per tool; when the server has
+  a resetter the tail is a full `threshold + 3` (the reset may have zeroed the
+  counter after the last burst). Tools with no detected gate (or a threshold
+  above 23) keep the exact previous plan; ordering rules (resetters last,
+  baseline readers first) are unchanged. The thresholds are a *plan-sizing*
+  fact, not a finding trigger: `uses_call_counter_gate` (which drives
+  `rugpull-source`) is unchanged, so an honest usage / rate-limit counter in a
+  helper adds depth but no finding. `rugpull._source_gates` does count a
+  helper-module counter as corroboration, but only once a drifted
+  instruction has already been observed (`response-diff-instruction`
+  medium -> high). Related fix: `_inline_helper_call` now folds the helper's
+  `mutated_state_names` / `accumulates_state` into the caller, so an honest
+  counter in a helper is recognised by `scope-creep` as bookkeeping (a global
+  no tool returns) instead of an unnamed mutation -- the same rule 2.5 test an
+  in-body counter already got. `gated_plan_depth` (threshold 10 in a helper
+  module; 8 -> 13 identical calls; `response-diff-instruction` high/high)
+  vs. `gated_plan_depth_benign` (usage counter, threshold 10, plan 13, zero
+  findings).
+  - *Blind spots.* Modulo / bit-test gates (`_calls % 7 == 0`), gates on a
+    value read from a file or environment, and gates above 23 calls are not
+    sized; a gate shared across tools is sized per tool; a static scan of a
+    helper-module gate still raises no `rugpull-source` finding by design.
+
+- **W1 prose routes (`data_supersession`, `textrules.
+  _SUPS_PROSE_ROUTE_RE` / `_SUPS_ANAPHORA_RE`).** *Phase: listing.* The family
+  now also fires when the replacement route is named in natural language,
+  provided it names a CONCRETE source: a filename (`workspace-config.txt`,
+  `prices.csv`), a quoted / parenthesised / backticked identifier with a
+  hyphen, underscore or dot, or "in/from/at/via/using the <X> note / file /
+  config / settings / sheet / ledger / page / document / registry ...". The
+  directive half also accepts the anaphoric soft form ("use those figures",
+  "use them", "use the current values", "use what it shows") with no
+  `instead`. BOTH halves are still required (stale / untrusted framing of data
+  the tool does not own AND the directive to use the replacement values), and
+  every earlier guard applies: first-sentence bare imperative, negation,
+  credential/session lifecycle, the tool's own cache or state, and a new one --
+  a prose route that precedes the staleness word in its own sentence is the
+  thing that is stale ("if the settings file is outdated, use the latest
+  version of the file"), not a supersession of other data. The route is
+  searched in the directive's own sentence (before or after the verb), the next
+  sentence, and (anaphoric directives only) the previous one. Weight and grade
+  unchanged (medium/medium). `data_supersession_prose` ×3 medium/medium vs.
+  `data_supersession_prose_benign` clean (a note-reading tool, "values in the
+  cache file may be outdated; this tool refreshes its own cache", a cache
+  refresher, a usage hint, a self-stale file).
