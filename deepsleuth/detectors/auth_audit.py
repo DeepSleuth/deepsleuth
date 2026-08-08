@@ -13,7 +13,7 @@ there is a *positive* signal:
 
 1. **A control is present but provably ineffective** (``auth-control-ineffective``,
    rule P3.2). Control-flow reasoning (``analysis.pyast.analyze_auth_control``) finds
-   an auth-shaped call or a permission-shaped parameter and proves it cannot the gate
+   an auth-shaped call or a permission-shaped parameter and proves it cannot gate
    the action: the result is discarded, the parameter is never consulted, or no
    branch halts when the check fails. This is a verifiable contradiction, not a
    guess, so it is reported at real severity/confidence and *replaces* the old
