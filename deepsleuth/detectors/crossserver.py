@@ -29,7 +29,7 @@ but by itself an honest ``search_v2`` can coincidentally sit beside an
 unrelated ``search`` on another server. rule P6.9 therefore only flags a
 suffix match when the two tools' DESCRIPTIONS are ALSO near-identical —
 the shape a genuine copy-with-a-new-suffix clone actually has, since it
-carries the original's tool description text near verbatim. A near-miss
+carries the original's description text near verbatim. A near-miss
 (genuine character-level typo, Damerau-Levenshtein distance 1) is flagged
 regardless of description, since that shape has no honest explanation.
 
