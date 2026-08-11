@@ -1,7 +1,7 @@
 """rule P1 — structure rules for descriptions/schemas that reach OUTSIDE the tool's
 own contract (1.1, 1.2, 1.6 of the improvement guide).
 
-The scanner's own design principle is that a tool description describes its own
+The scanner's own design principle is that a description describes its own
 tool. Three ways a description contradicts that contract, purely structurally
 — no hardcoded tool/server names or payload strings, only the server's own
 live sibling-tool list (already on ``ctx`` — rule 1.8; both frontends populate
