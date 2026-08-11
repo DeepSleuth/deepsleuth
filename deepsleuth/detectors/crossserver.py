@@ -2,7 +2,7 @@
 class no single-server rule can see).
 
 Every per-server detector in this package reasons about ONE server's own
-tool tool listing at a time. When a caller scans SEVERAL servers together (one
+tool listing at a time. When a caller scans SEVERAL servers together (one
 ``mcp.json`` with multiple entries, or any list of ``ScanContext``s handed
 to :func:`compare_tool_names`), this pass instead compares tool names
 ACROSS servers: normalize (lowercase, strip non-alphanumerics), strip a
