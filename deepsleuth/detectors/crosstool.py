@@ -10,7 +10,7 @@ live sibling-tool list (already on ``ctx`` — rule 1.8; both frontends populate
 obligation/invoke/tamper words:
 
 1.1 Cross-tool call rule — a sentence names a SIBLING tool (from this same
-    tool listing) plus an obligation/sequence word (must, always, before, after,
+    listing) plus an obligation/sequence word (must, always, before, after,
     when, first, ...) plus an invoke verb (call, use, run, execute, ...). A
     tool's own description has no legitimate reason to direct the agent
     toward invoking a *different*, specifically-named tool — that is the
