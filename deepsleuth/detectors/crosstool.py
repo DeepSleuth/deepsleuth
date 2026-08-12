@@ -154,7 +154,7 @@ _INVOKE_RX = re.compile(
     r"execut(?:e|es|ed|ing)|us(?:e|es|ed|ing)|trigger(?:s|ed|ing)?)\b",
     re.IGNORECASE)
 
-# rule 1.1 — actionable-tier the gate: a STRONG obligation word only (must/always/
+# rule 1.1 — actionable-tier gate: a STRONG obligation word only (must/always/
 # never/mandatory/required) — the narrow B-grade from the improvement guide's
 # own measurement table, which alone keeps ~75% of the benchmark's real
 # hijack recall while cutting real-server false flags by about 5x relative to
