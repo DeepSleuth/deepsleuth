@@ -29,7 +29,7 @@ from .response import SECRET_VALUE_RE
 # rule P0.7: whole-token match now lives in analysis.pyast.is_secret_hint_name
 # (shared with argument synthesis) — a bare substring regex is what let
 # "author" (contains "auth") register as a secret-shaped argument key.
-# For free-text tool description prose (not an identifier — spaces, not
+# For free-text description prose (not an identifier — spaces, not
 # camelCase/underscores, separate its words) a plain word-boundary regex is
 # the right tool: \bauth\b matches the standalone word "auth" but not the
 # "auth" inside "author", because there is no word boundary between the 'h'
