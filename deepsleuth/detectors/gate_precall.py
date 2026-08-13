@@ -1,4 +1,4 @@
-"""Pre-call the gate detectors (rule 4.7 interposition point 2).
+"""Pre-call gate detectors (rule 4.7 interposition point 2).
 
 Run in the ``precall`` phase against ``ctx.pending_call`` — one pending tools/call
 plus the target tool's contract and accumulated state. They surface the per-call
