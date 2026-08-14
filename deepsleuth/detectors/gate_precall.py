@@ -4,7 +4,7 @@ Run in the ``precall`` phase against ``ctx.pending_call`` — one pending tools/
 plus the target tool's contract and accumulated state. They surface the per-call
 risks the gate maps to allow / elicit / block:
 
-* an argument carrying a credential/secret-shaped value (or a planted decoy canary)
+* an argument carrying a credential/secret-shaped value (or a planted canary)
   toward a tool whose contract does not justify holding secrets and which can
   reach the network — a confused-deputy / exfiltration hard rule,
 * a call to a tool that source analysis shows has a taint path to a dangerous sink
