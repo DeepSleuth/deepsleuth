@@ -31,7 +31,7 @@ from ._util import mk
 # V3-2: a match is disqualified when the surrounding text marks the "other"
 # reference as self-referential — a coordinator/orchestrator tool honestly
 # describing itself as delegating to "the other tools in this (same) server/
-# package/suite" is not a collision, it is an accurate tool description of its own
+# package/suite" is not a collision, it is an accurate description of its own
 # multi-tool design. Only a reference to a genuinely distinct, foreign entity
 # (no such self-referential qualifier nearby) counts.
 SELF_REF = re.compile(
