@@ -11,7 +11,7 @@ Handshake serverInfo and tool names/descriptions are self-asserted. We flag:
   tools (P1.2: two tools naturally sharing vocabulary about their own prior
   behavior, e.g. "replaces the old inline edit command", is benign and must
   not fire),
-* duplicate tool names within one tool listing (a shadow of a sibling),
+* duplicate tool names within one listing (a shadow of a sibling),
 * impersonation lexicon in the declared identity (official/verified/system/…)
   inconsistent with the package/config identity (normalized so formatting-only
   differences, e.g. "System Monitor" vs. "system-monitor", do not misfire).
