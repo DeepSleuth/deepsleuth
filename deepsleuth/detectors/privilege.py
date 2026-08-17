@@ -1,7 +1,7 @@
 """rule 5.4 — privilege / scope-creep / hint violations.
 
 This is the sharpest, most-generalizing signal in the brief: the tool's *declared
-contract* (readOnlyHint / destructiveHint, or a read-only-shaped tool description)
+contract* (readOnlyHint / destructiveHint, or a read-only-shaped description)
 versus the *behavior its implementation actually exhibits*. A tool that declares
 ``readOnlyHint: true`` but writes files, deletes, spawns processes, executes code
 or mutates server state is a confirmed contradiction — high confidence, and it
