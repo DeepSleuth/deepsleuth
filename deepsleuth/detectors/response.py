@@ -1317,7 +1317,7 @@ register(Detector(
     id="response-leak", category="data-exfiltration",
     evidence_location="multi-call-state", phase="response", run=_run_leak,
     requires={CAP_DYNAMIC},
-    rationale=("Planted canaries make leakage fully deterministic: a canary surfacing where "
+    rationale=("Planted canaries make leakage deterministic: a canary surfacing where "
                "it was never passed proves cross-call state leakage, decoy-file "
                "content in a response proves a sensitive read, and credential-shaped "
                "output beyond the described scope proves over-sharing."),
