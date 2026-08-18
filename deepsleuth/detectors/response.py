@@ -1,7 +1,7 @@
 """rule 5.3(a) + rule 5.5 — runtime-response detectors.
 
 * response-injection: apply the normalized rule 5.1 mechanism rules to every tool
-  *response* (not just the static tool description), with a stricter response-specific
+  *response* (not just the static description), with a stricter response-specific
   grading bar (rules P1.3/P2.1): fire only when the response (a) is agent-directed,
   (b) steers a hidden or next-step action (exfiltrate/redirect/override/conceal/
   contact an external destination) and (c) is out of scope for the tool's job —
