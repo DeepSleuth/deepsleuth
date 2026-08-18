@@ -24,7 +24,7 @@ from ._util import mk
 # list" as read-shaped (only "list" matched), so an honest exec tool whose
 # description happened to be written in the third person fired scope-creep.
 READ_VERBS = re.compile(
-    r"\b(get|gets|getting|list|lists|tool listing|read|reads|reading|fetch|fetches|"
+    r"\b(get|gets|getting|list|lists|listing|read|reads|reading|fetch|fetches|"
     r"fetching|show|shows|showing|search|searches|searching|query|queries|"
     r"querying|look\s?up|looks\s?up|retriev\w+|view|views|viewing|display|"
     r"displays|displaying|describe|describes|describing|check|checks|checking|"
