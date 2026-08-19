@@ -823,7 +823,7 @@ def _run_response_redirect(ctx: ScanContext) -> List[Finding]:
                 rationale=(f"Tool response instructs the agent to call '{named}', which "
                            "is not a tool this server declares — a response naming and "
                            "directing the agent toward a tool OUTSIDE its own server's "
-                           "tool listing has no legitimate purpose, independent of any "
+                           "listing has no legitimate purpose, independent of any "
                            "secret/credential reference in the same clause."
                            + (" The directive is label-shaped (a next-step/action/"
                               "todo label whose value is a tool call), which is "
