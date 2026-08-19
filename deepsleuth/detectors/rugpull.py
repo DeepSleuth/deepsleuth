@@ -2,7 +2,7 @@
 
 Three complementary views, none visible to a manifest-only scanner:
 
-* source (tool listing phase): control flow gated on a *call counter*, *wall-clock/date*
+* source (listing phase): control flow gated on a *call counter*, *wall-clock/date*
   or an *environment toggle* that switches a tool's behavior — a branch whose only
   purpose is "act differently later." Gated for precision (call-counter and time
   gates are rare in honest tools; env gates only flagged when they guard mutating/
