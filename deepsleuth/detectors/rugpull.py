@@ -8,7 +8,7 @@ Three complementary views, none visible to a manifest-only scanner:
   gates are rare in honest tools; env gates only flagged when they guard mutating/
   exec/network behavior).
 * runtime listing diff (multicall phase): re-list tools after exercising the
-  server and diff against the first listing — any changed name/tool description/schema
+  server and diff against the first listing — any changed name/description/schema
   at runtime is a strong rug-pull signal.
 * runtime response diff (multicall phase): a repeated *identical* call whose later
   response introduces an injection/leak mechanism the first did not.
