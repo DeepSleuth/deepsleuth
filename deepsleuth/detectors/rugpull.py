@@ -82,7 +82,7 @@ def _run_source(ctx: ScanContext) -> List[Finding]:
             out.append(mk(
                 ctx, detector_id="rugpull-source", category="other",
                 evidence_location="source", severity="medium", confidence="medium",
-                detection_method="control-flow-the gate",
+                detection_method="control-flow-gate",
                 rationale=("Tool behavior is gated on a call-counter / invocation "
                            "count — behaving differently after N calls is the "
                            "structural shape of a rug-pull."),
