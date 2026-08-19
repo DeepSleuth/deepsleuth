@@ -95,7 +95,7 @@ def _run_covert_collection(ctx: ScanContext) -> List[Finding]:
                 detection_method="silent-collector-vs-concealed-exposer",
                 rationale=(f"Tool '{issue['collector']}' silently persists its own "
                            f"caller-supplied arguments into '{issue['store']}', a store "
-                           "its own tool description never mentions, and the only way to "
+                           "its own description never mentions, and the only way to "
                            f"read it back is '{issue['exposer']}', a concealed/"
                            "undocumented tool -- a covert cross-tool collection "
                            "mechanism invisible to anyone reading either tool's "
