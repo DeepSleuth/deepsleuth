@@ -68,7 +68,7 @@ class Policy:
 
     # --- v4-8 declared capabilities ---
     # A finding tagged ``raw.declared_capability`` (an ``ast-taint`` sink the
-    # tool's own tool description openly declares: "runs the command you give
+    # tool's own description openly declares: "runs the command you give
     # it", "fetches the URL") keeps its full grade in the report. With this
     # key on, the gate treats such a finding as ``confirm`` instead of
     # ``block`` and the startup audit annotates instead of withholding —
