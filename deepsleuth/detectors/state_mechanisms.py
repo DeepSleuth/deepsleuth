@@ -109,7 +109,7 @@ def _run_covert_collection(ctx: ScanContext) -> List[Finding]:
 
 register(Detector(
     id="session-reuse", category="confused-deputy", evidence_location="source",
-    phase="tool listing", run=_run_session_reuse, requires={CAP_SOURCE},
+    phase="listing", run=_run_session_reuse, requires={CAP_SOURCE},
     rationale=("A session/token-shaped identifier used as the only key into shared "
                "server state, with no verification that the presenter is who it was "
                "issued to, is a confused-deputy/BOLA shape independent of whether the "
