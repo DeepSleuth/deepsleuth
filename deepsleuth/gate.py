@@ -1,4 +1,4 @@
-"""The the gate — fully deterministic policy over findings (interposition point 2/3).
+"""The the gate — deterministic policy over findings (interposition point 2/3).
 
 The gate is the shared decision layer for Frontend A. It is a pure function over a
 set of findings plus a :class:`Policy`, so it is identical in the live proxy and in
