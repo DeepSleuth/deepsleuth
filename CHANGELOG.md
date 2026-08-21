@@ -4,6 +4,13 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.8.0] — 2026-08-21
+
+benchmarks + packaging.
+
+- docker packaging (Dockerfile), optional extras (pyyaml, official sdk)
+- published per-target results for public MCP-security benchmark suites
+
 ## [0.7.0] — 2026-07-14
 
 state mechanisms.
