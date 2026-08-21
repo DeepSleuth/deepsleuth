@@ -430,7 +430,7 @@ class InlineProxy:
                 continue  # withhold poisoned tool entirely
             if name in self.annotations:
                 t = dict(t)
-                t["tool description"] = (self.annotations[name] + " "
+                t["description"] = (self.annotations[name] + " "
                                     + (t.get("description") or ""))
             out_tools.append(t)
         new_result = dict(result)
