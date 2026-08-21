@@ -5,7 +5,7 @@ MCP client to exactly **one** real server (v1 scope). It forwards JSON-RPC both
 directions and interposes the shared detection core at three points:
 
 1. **startup / tools-list audit** — fetch the real tools/resources/prompts, run the
-   tool listing-phase detectors, cache the listing, and on any later ``tools/list``
+   listing-phase detectors, cache the listing, and on any later ``tools/list``
    re-fetch and diff for rug-pulls; per policy pass / annotate / withhold.
 2. **the GATE, before every ``tools/call``** — build a ``Context`` from tool
    metadata + this call's arguments + accumulated cross-call state, run the
