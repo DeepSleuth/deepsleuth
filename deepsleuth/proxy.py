@@ -15,7 +15,7 @@ directions and interposes the shared detection core at three points:
 
 Detectors are the SAME core detectors Frontend B uses — written once, run in both.
 This module contains only the two things unique to Frontend A: the live stdio
-gateway loop, and the headless ``proxy-eval`` driver that pushes a fully deterministic
+gateway loop, and the headless ``proxy-eval`` driver that pushes a deterministic
 call plan through the very same gate for offline scoring.
 
 Determinism: no LLM, no latency-dependent behavior. Same session inputs -> same
