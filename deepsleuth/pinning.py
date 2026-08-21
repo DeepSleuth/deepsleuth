@@ -44,7 +44,7 @@ def _tool_fingerprint(c) -> str:
     does or what arguments it takes must not hash identically to the
     unchanged tool."""
     blob = json.dumps(
-        {"tool description": c.description or "",
+        {"description": c.description or "",
          "schema": c.input_schema or {},
          "hints": c.hints or {}},
         sort_keys=True, default=str,
