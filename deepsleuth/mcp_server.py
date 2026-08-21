@@ -16,7 +16,7 @@ Tools exposed (the scanner's own capabilities, callable by an agent):
 
   * list_detectors()            -- the full detector registry.
   * check_listing(tools_json)  -- analyze a SUPPLIED tool listing (a JSON
-                                   array of {name, tool description, inputSchema},
+                                   array of {name, description, inputSchema},
                                    or an object with a "tools" key) with the
                                    listing-phase detectors, without launching
                                    anything. Paste another server's
