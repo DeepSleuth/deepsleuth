@@ -9,7 +9,7 @@ target entry — is exactly the shadow-server/impersonation shape
 server, in one session, in isolation. This module gives the proxy frontend
 durable state across sessions: a hash of the handshake identity plus the
 live tool-name list, persisted to a small JSON store, checked and updated
-on every startup tool listing.
+on every startup listing.
 
 Purely structural and deterministic — no vocabulary, no payload matching,
 just "does this configured target's declared identity/tool-set match what
