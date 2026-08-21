@@ -325,7 +325,7 @@ def build_call_plan(tools: List[Dict[str, Any]], passes: int = 2, burst: int = 3
        response (cross-call leakage) and lets an identical repeated call
        across passes reveal response drift (rug-pull) —
        ``detectors.rugpull._run_runtime`` groups ALL calls (burst + passes)
-       to the same tool with identical (fully deterministic, so pass-to-pass
+       to the same tool with identical (deterministic, so pass-to-pass
        identical) arguments and diffs first-vs-later.
     3. v3-4.2 — the burst is REPEATED once after the round-robin passes, so
        a counter gate armed only by the interleaved calls still trips.
