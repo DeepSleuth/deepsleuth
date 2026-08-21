@@ -28,7 +28,7 @@ Tools exposed (the scanner's own capabilities, callable by an agent):
                                    default; dynamic=True additionally launches
                                    the target inside the Docker sandbox
                                    (never unsandboxed -- untrusted targets are
-                                   always docker-sandboxed).
+                                   always sandboxed).
 
 Same detection core, same deterministic findings, no LLM. This module only
 adds the MCP stdio server loop; it does not modify any other scanner code.
