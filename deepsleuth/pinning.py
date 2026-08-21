@@ -11,7 +11,7 @@ durable state across sessions: a hash of the handshake identity plus the
 live tool-name list, persisted to a small JSON store, checked and updated
 on every startup tool listing.
 
-Purely structural and fully deterministic — no vocabulary, no payload matching,
+Purely structural and deterministic — no vocabulary, no payload matching,
 just "does this configured target's declared identity/tool-set match what
 we pinned last time, and does any OTHER configured target already claim the
 SAME declared name?".
