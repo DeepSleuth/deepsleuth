@@ -30,7 +30,7 @@ Tools exposed (the scanner's own capabilities, callable by an agent):
                                    (never unsandboxed -- untrusted targets are
                                    always docker-sandboxed).
 
-Same detection core, same fully deterministic findings, no LLM. This module only
+Same detection core, same deterministic findings, no LLM. This module only
 adds the MCP stdio server loop; it does not modify any other scanner code.
 """
 from __future__ import annotations
