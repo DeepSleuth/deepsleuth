@@ -209,7 +209,7 @@ def flatten_result(result_msg: Dict[str, Any]) -> Tuple[str, bool, Any]:
 #     every phase, so a call-counter-gated rug pull in another tool is never
 #     silently re-armed by an intervening reset between two of its own burst
 #     calls.
-# A tool with no source facts at all (live tool listing only) is treated as a
+# A tool with no source facts at all (live listing only) is treated as a
 # reader; nothing about its name is consulted.
 _BEHAVIOR_RANK = {"mutator": 0, "reader": 1, "reset": 2}
 
