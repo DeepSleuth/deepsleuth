@@ -317,7 +317,7 @@ def build_call_plan(tools: List[Dict[str, Any]], passes: int = 2, burst: int = 3
        (resetters last), so a call-counter-gated rug pull (``if _calls >=
        3: ...``) actually trips within one tool's own burst — the shallow
        2-pass round-robin alone calls each tool only once per pass,
-       interleaved with every OTHER tool's calls, so a counter the gate at 3+
+       interleaved with every OTHER tool's calls, so a counter gate at 3+
        calls, or one an intervening reset call re-arms between passes,
        could never fire.
     2. Then the round-robin passes (default 2), same ordering, which is what
