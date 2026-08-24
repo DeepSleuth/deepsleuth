@@ -116,7 +116,7 @@ def test_poisoning_corroborated_across_description_and_schema_raised_to_high():
             },
         )
     ]
-    findings = [f for f in run_phase(ctx, "tool listing") if f.severity != "none"]
+    findings = [f for f in run_phase(ctx, "listing") if f.severity != "none"]
     poison = [f for f in findings if f.category == "tool-poisoning"]
     assert len(poison) == 2
     locs = {f.evidence_location for f in poison}
