@@ -76,7 +76,7 @@ def test_genuine_tool_shadowing_still_detected():
     findings, _ = _static("tool_shadow")
     shadow = [f for f in findings if f.category == "tool-shadowing"]
     assert shadow, "expected a tool-shadowing finding for genuine identity assertion"
-    assert shadow[0].evidence_location == "tool description"
+    assert shadow[0].evidence_location == "description"
 
 
 def test_genuine_tool_shadowing_still_detected_varied_wording():
