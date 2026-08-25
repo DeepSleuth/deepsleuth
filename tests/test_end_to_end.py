@@ -43,7 +43,7 @@ def test_benign_auth_family_is_clean():
 
 def test_auth_control_present_but_ineffective_detected():
     """P3.2: a control that is present (a permission parameter, or an auth-check
-    call) but provably does not the gate the sensitive action is a verifiable
+    call) but provably does not gate the sensitive action is a verifiable
     contradiction and must fire — distinct from mere absence."""
     findings, _ = _static("authbypass")
     ids = {f.detector_id for f in findings}
