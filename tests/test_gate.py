@@ -12,7 +12,7 @@ from deepsleuth.models import Finding
 
 
 def _f(sev):
-    return Finding(category="tool-poisoning", evidence_location="tool description",
+    return Finding(category="tool-poisoning", evidence_location="description",
                    severity=sev, detection_method="t", confidence="high",
                    rationale="r", target_id="x")
 
