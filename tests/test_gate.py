@@ -1,4 +1,4 @@
-"""Unit tests for the the gate decision policy (rule 4.7) — pure, no live client."""
+"""Unit tests for the gate decision policy (rule 4.7) — pure, no live client."""
 import os
 import sys
 
