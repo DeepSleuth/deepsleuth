@@ -371,7 +371,7 @@ def test_bare_unpromised_record_list_demoted_to_low_confidence():
 
 def _leak_ctx(planting_desc, surfacing_desc, surfacing_name="get_audit_log"):
     ctx = _direct_ctx([("create_ticket", planting_desc), (surfacing_name, surfacing_desc)])
-    decoy canary = CANARIES.arg("create_ticket", "note")
+    canary = CANARIES.arg("create_ticket", "note")
     ctx.calls = [
         CallRecord(seq=0, tool_name="create_ticket", arguments={"note": canary},
                   response_text="Ticket created."),
