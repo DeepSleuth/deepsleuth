@@ -97,7 +97,7 @@ def test_credential_resource_benign_stays_clean():
 
 def _direct_ctx(tools):
     ctx = ScanContext(target=Target(target_id="phase3-response"))
-    ctx.tools = [ToolContract(name=n, tool description=d) for n, d in tools]
+    ctx.tools = [ToolContract(name=n, description=d) for n, d in tools]
     return ctx
 
 
