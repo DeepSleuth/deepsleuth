@@ -2,7 +2,7 @@
 collapse: aliased state-mutation detection, an
 auth-check that delegates to a constant-stub function, ownership-less
 session/id lookups, an audit trail present in form but not substance, covert
-cross-tool collection, the call-counter-the gate false-positive fix, and
+cross-tool collection, the call-counter-gate false-positive fix, and
 identity-shaped argument correlation across DIFFERENT tools (the root cause
 behind every missed cross-call-state case).
 """
