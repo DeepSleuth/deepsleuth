@@ -353,7 +353,7 @@ def test_silent_collector_with_concealed_exposer_is_flagged():
 
 def test_transparent_logging_tool_pair_is_not_flagged_as_covert():
     # the tool honestly says it stores/logs, and the store name itself says
-    # "log" -- neither the tool description-transparency nor the log-vocabulary
+    # "log" -- neither the description-transparency nor the log-vocabulary
     # exclusion should let this register as *covert*.
     src = (
         "call_log = []\n"
