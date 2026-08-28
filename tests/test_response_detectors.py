@@ -29,7 +29,7 @@ def _load(fixture: str):
 def _ctx_from_module(fixture: str, mod, calls):
     ctx = ScanContext(target=Target(target_id=fixture))
     ctx.tools = [
-        ToolContract(name=t["name"], tool description=t["description"],
+        ToolContract(name=t["name"], description=t["description"],
                      input_schema=t.get("inputSchema", {}),
                      hints=dict(t.get("annotations", {}) or {}))
         for t in mod.mcp._tools
