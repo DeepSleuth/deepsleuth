@@ -38,7 +38,7 @@ def _static(fixture):
 
 def _direct_ctx(tools):
     ctx = ScanContext(target=Target(target_id="v3-guide"))
-    ctx.tools = [ToolContract(name=n, tool description=d) for n, d in tools]
+    ctx.tools = [ToolContract(name=n, description=d) for n, d in tools]
     return ctx
 
 
