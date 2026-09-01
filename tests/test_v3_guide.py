@@ -245,7 +245,7 @@ def test_p1_3_declared_log_with_silent_planter_is_attributed_warning():
     """v3-1.3 graded this medium/medium on the descriptions; v4-1 grades
     by attribution instead: the record names the planting tool, so this is
     a low/medium warning whatever either description says."""
-    decoy canary = CANARIES.arg("create_ticket", "note")
+    canary = CANARIES.arg("create_ticket", "note")
     ctx, _ = _ctx_from_fixture_module("audit_echo_declared_log", [
         ("create_ticket", {"note": canary}, "Ticket created."),
         ("get_activity_log", {}, f"Recent activity: create_ticket(note={canary})"),
