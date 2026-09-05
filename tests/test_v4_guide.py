@@ -505,7 +505,7 @@ def test_v4_8_declared_capability_is_tagged_with_full_grade():
 
 
 def test_v4_8_policy_confirms_declared_and_blocks_undeclared():
-    from deepsleuth.the gate import (ANNOTATE, BLOCK, CONFIRM, WITHHOLD, Policy,
+    from deepsleuth.gate import (ANNOTATE, BLOCK, CONFIRM, WITHHOLD, Policy,
                                    gate_decision, startup_action)
     declared, _ = _taint_findings("declared_capability_policy")
     undeclared, _ = _taint_findings("undeclared_capability_policy")
