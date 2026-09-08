@@ -77,7 +77,7 @@ def _facts(src: str, tool: str = None):
     return td, analyze_tool_function(td.node, td.params, g, src, module_functions=helpers)
 
 
-def _leak_hits(ctx, decoy canary):
+def _leak_hits(ctx, canary):
     return [f for f in _response_findings(ctx) if f.detector_id == "response-leak"
             and f.evidence.get("canary") == canary]
 
