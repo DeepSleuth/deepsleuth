@@ -43,7 +43,7 @@ def _by_tool(findings, detector_id=None):
 
 def _direct_ctx(tools):
     ctx = ScanContext(target=Target(target_id="v5-guide"))
-    ctx.tools = [ToolContract(name=n, tool description=d) for n, d in tools]
+    ctx.tools = [ToolContract(name=n, description=d) for n, d in tools]
     return ctx
 
 
