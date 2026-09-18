@@ -2,7 +2,7 @@
 ships a malicious fixture/shape that must stay caught at its stated grade and
 an honest twin that must stay clean or informational. Static items scan a
 fixture under ``tests/fixtures/`` with ``scan_target(..., do_dynamic=False)``;
-tool listing-shaped items build a ``ScanContext`` from a listing JSON exactly as
+listing-shaped items build a ``ScanContext`` from a listing JSON exactly as
 both frontends do (``context.contract_from_listing``); response-phase items
 build the call log by hand, so no Docker is needed to prove a mechanism.
 """
