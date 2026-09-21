@@ -62,3 +62,46 @@ tools) 5 tools actionable, two of them genuine command runners; sentinel-scan-cl
 fixtures 11/20 malicious caught (9/20 in the previous version), 0/20 clean
 flagged; mcp-shield JavaScript demo 3/5 poisoned tools caught.
 
+## Version history, same scoring
+
+| Version | MCPTox actionable, alone (of 485) | MCPSecBench strict (of 9) | MSB strict (of 90) | Visibility strict (of 41) | Visibility FP (of 19) | Real-server tools withheld |
+|---|---|---|---|---|---|---|
+| original | 111 | 6 | 0 | 32 | 2 | 104 |
+| round 1 | 394 | 6 | 42 | 37 | 0 | 78 |
+| precision round | 359 | 6 | 54 | 35 | 1 | 37 |
+| first mechanism round | 358 | 7 | 66 | 37 | 2 | 21 |
+| second mechanism round | 358 | 7 | 66 | 37 | 0 | 21 |
+| **this version** | **345** | **8** | **66** | **37** | **0** | **16** |
+
+The precision round traded about eight points of MCPTox recall for cutting
+real-server withholds in half; the first mechanism round kept that recall and
+halved the withholds again while restoring the two detections the precision round had lost
+(a declared command runner's injection, and a label-shaped response redirect).
+The second mechanism round changed no recall figure and removed both visibility
+false positives. One visibility case that had been flagged only by an audit-echo
+finding identical to its benign twin's is now, correctly, no longer counted as
+actionable (40 to 39), while mechanism-strict stays at 37.
+
+The third mechanism round (this version) is a trade, and it is reported as one.
+It changed how a reference to another tool is graded: a clause that relates two
+tools other than the described one is now actionable, and a strong obligation
+word escalates a reference only when the other tool is the object of a call. It
+also narrowed the shadowing rule to objects shaped like a tool or a server, and
+taught the exfiltration and secret-store wording families to separate a
+description of what a tool does from an instruction to the agent.
+
+- **Gained:** five fewer real-server withholds (21 to 16); two more MCPSecBench
+  tools caught (7 to 9 actionable); two more sentinel fixtures (9 to 11); and
+  30 more MCPTox detections when a description is scanned with its server's
+  tool list (395 to 425: 38 gained, 8 lost, all through the cross-tool rule).
+- **Lost:** 13 MCPTox detections when a description is scanned alone (358 to
+  345: 11 gained, 24 lost). Of the 24, 17 are still reported, at low grade, by
+  the cross-tool rule; 7 had been caught only by the old, broader shadowing
+  rule and now produce no finding. 17 of the 24 are caught once the tool list
+  is present.
+
+The round as first built stood at 341 alone. A follow-up replaced the
+word-order test in the obligation-word rule with the object test and brought
+that to 345 without bringing any real-server flag back. The remaining gap to
+the previous version is real and is not hidden by the in-listing figure.
+
