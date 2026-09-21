@@ -105,3 +105,18 @@ word-order test in the obligation-word rule with the object test and brought
 that to 345 without bringing any real-server flag back. The remaining gap to
 the previous version is real and is not hidden by the in-listing figure.
 
+## Head to head
+
+Figures for the five public scanners come from the same measurement runs, where they
+were measured on data their authors had not tuned against. deepsleuth's row is
+this version, in-sample. The comparison is therefore not like for like.
+
+| Scanner | MCPTox loose | MCPTox strict | MCPSecBench strict (of 9) | MCPSecBench FP (of 6) | MSB loose (of 90) | MSB strict | MSB FP (of 21) | Visibility strict (of 41) |
+|---|---|---|---|---|---|---|---|---|
+| **deepsleuth** | **80.8%** | **71.1%** | **8** | 0 | 72 | **66** | 1 | **37** |
+| Snyk Agent Scan | 74.8% | 64.1% | 0 | 0 | 74 | 0 | 16 | 0 |
+| mcp-armor | 35.3% | 20.8% | 1 | 2 | 19 | 0 | 0 | 0 |
+| sentinel-scan-cli | 25.4% | 2.5% | 2 | 0 | 16 | 0 | 4 | 0 |
+| NVIDIA SkillSpector (static) | 22.5% | 2.5% | 1 | 0 | 2 | 0 | 1 | 0 |
+| Cisco mcp-scanner | 20.4% | 3.1% | 0 | 0 | 0 | 0 | 0 | 0 |
+
