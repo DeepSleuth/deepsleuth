@@ -120,3 +120,35 @@ this version, in-sample. The comparison is therefore not like for like.
 | NVIDIA SkillSpector (static) | 22.5% | 2.5% | 1 | 0 | 2 | 0 | 1 | 0 |
 | Cisco mcp-scanner | 20.4% | 3.1% | 0 | 0 | 0 | 0 | 0 | 0 |
 
+## Honest caveats
+
+1. **Strict is mechanical, but the mapping is ours.** Each summary file states
+   which detector ids count for which planted mechanism. A different mapping
+   gives different strict counts; the loose and actionable columns do not depend
+   on it.
+2. **The one benchmark false positive is a real finding on an honest tool.** On
+   MSB, a terminal tool that runs commands by design is reported at critical
+   severity, medium confidence: the scanner does not discount an injection
+   because the description declares the capability. The finding is tagged
+   `declared_capability`, and an operator who accepts such tools can set
+   `allow_declared_capabilities: true` in the policy to turn the block into a
+   confirm. The two visibility-bench false positives of the previous round are
+   gone: an audit echo that names the tool it records is now a low-severity
+   warning, and a mutating tool whose description uses a write verb is no longer
+   read as read-only.
+3. **MCPSecBench used the dynamic layer** (Docker sandbox, 125 calls over 13
+   tools). All nine malicious tools now carry an actionable finding; strict
+   reads 8/9 because one of them is caught by the output-substitution rule,
+   which the strict mapping written before this round does not credit for that
+   tool. The mapping was left unchanged rather than adjusted after the fact. **MSB ran static-only**; its servers cannot be launched without
+   their original harness. The `name_overlap` class is detectable only when the
+   renamed variant and its original are scanned in one invocation, so that
+   figure is reported separately.
+4. **MCPTox is scanned without its server's tool list** in the headline row,
+   as in those runs. The in-listing row is the fairer test of the
+   sibling rule and is reported beside it, not instead of it. The gap between
+   the two rows is now 16 points (71.1% alone, 87.6% with the list): a scan
+   that does not supply the tool list gives up real recall, and the alone
+   figure fell in this version.
+5. **Single run.** deepsleuth is deterministic; one run reproduces exactly.
+
