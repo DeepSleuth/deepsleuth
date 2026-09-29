@@ -152,3 +152,10 @@ this version, in-sample. The comparison is therefore not like for like.
    figure fell in this version.
 5. **Single run.** deepsleuth is deterministic; one run reproduces exactly.
 
+## Reproducing
+
+Each `*_summary.json` gives the counts above and the strict rule; each
+`*_per_target.json` gives the raw findings for every target, joinable against the
+dataset's public ground truth. The visibility per-target file marks the held-out split. The scoring harness
+itself is not yet in this repo; adding it, with a check that a fresh run matches
+the stored files, is first on the benchmark roadmap.
