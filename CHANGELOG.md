@@ -4,6 +4,12 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [0.9.1] — 2026-09-29
+
+fixes.
+
+- fix CLI flag parsing for proxy-eval --policy
+
 ## [0.9.0] — 2026-09-18
 
 docs + hardening.
