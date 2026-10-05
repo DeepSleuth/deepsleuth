@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [1.0.0] — 2026-10-05
+
+public release.
+
+- stable finding schema, deterministic byte-identical outputs
+- v1 coverage: eight evidence locations, seventeen mechanism categories
+- first public release
+
 ## [0.9.1] — 2026-09-29
 
 fixes.
