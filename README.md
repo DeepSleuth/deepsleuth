@@ -152,3 +152,8 @@ and how to add a detector.
   requests are best-effort.** All gate/audit/diff/response logic is fully exercised
   by `proxy-eval`, which is what the offline evaluator scores.
 - Without Docker, dynamic detectors are skipped (reported, not silent).
+
+## Getting involved
+
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+Found a security issue? Please follow [SECURITY.md](SECURITY.md).
