@@ -4,6 +4,21 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [1.0.1] — 2026-10-06
+
+fixes + agent-plugin packaging; first PyPI release.
+
+- command targets harvest source from what the command names (entry script,
+  relative dir), never the working directory; a command target with no local
+  source now says so in the report instead of reading as a clean pass
+- python tool descriptions held in imported constants resolve
+  (``desc-poisoning`` sees ``from _d import DESCRIPTION`` shapes)
+- ``dist/`` is no longer skipped when ingesting unpacked npm packages
+- agent-plugins 1.0.0 package at the repo root (``plugin.json``,
+  ``mcp.json``, ``skills/audit-mcp-server``) — installable by
+  open-plugins-compatible clients without hand-wiring an mcpServers entry
+- published on PyPI: ``pip install deepsleuth``
+
 ## [1.0.0] — 2026-10-05
 
 public release.

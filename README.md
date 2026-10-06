@@ -43,6 +43,8 @@ Python 3.11+. No required third-party packages — the scanner speaks MCP over s
 itself, so it installs in externally-managed (PEP 668) environments.
 
 ```bash
+pip install deepsleuth                                             # published on PyPI
+# or from source:
 pip install git+https://github.com/DeepSleuth/deepsleuth-mcp.git   # zero required dependencies
 deepsleuth --help
 # or straight from the source tree:
