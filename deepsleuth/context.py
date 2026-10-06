@@ -300,7 +300,10 @@ def build_source_facts(source_files: List[SourceFile]) -> Dict[str, SourceFacts]
         dict_literal_keys = collect_dict_literal_keys(tree)  # rule 3.2
         # rule 2.7 — includes tools registered without a per-tool decorator
         # (functional registration, low-level SDK list_tools/call_tool).
-        tool_defs = extract_tools_all(tree)
+        # ``module_consts`` carries the W7 cross-module constant env, so a
+        # description held in an imported constant
+        # (``from _d import DESCRIPTION``) is resolved, not blanked.
+        tool_defs = extract_tools_all(tree, base=module_consts)
         # rule 2.2 (FP fix) — every REGISTERED tool's own function name in this
         # module, so ``<name>.__doc__ = ...`` is only a rug-pull signal when
         # ``<name>`` actually is a registered tool (see

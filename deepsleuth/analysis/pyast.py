@@ -803,9 +803,12 @@ def param_docs_for(node: ast.AST) -> Dict[str, str]:
     return out
 
 
-def extract_tools(tree: ast.AST) -> List[ToolDef]:
+def extract_tools(tree: ast.AST, base: Optional[Dict[str, Any]] = None) -> List[ToolDef]:
     tools: List[ToolDef] = []
-    consts = _collect_str_consts(tree)
+    # ``base`` seeds the module's name->value table with constants resolved
+    # from sibling modules (``from _d import DESCRIPTION``): a description
+    # held in an imported constant is indirection, not invisibility.
+    consts = _collect_str_consts(tree, base)
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
@@ -1203,7 +1206,7 @@ def _find_decorated_handlers(tree: ast.AST, method_names: Set[str]) -> List[ast.
             and _decorated_with(n, method_names)]
 
 
-def extract_tools_all(tree: ast.AST) -> List[ToolDef]:
+def extract_tools_all(tree: ast.AST, base: Optional[Dict[str, Any]] = None) -> List[ToolDef]:
     """rule 2.7 — every tool this module registers, however it registers them:
     the per-tool decorator form (``extract_tools``), the functional-
     registration form (``add_tool``/``mcp.tool()(fn)``), and the low-level
@@ -1212,10 +1215,10 @@ def extract_tools_all(tree: ast.AST) -> List[ToolDef]:
     a low-level ``list_tools`` description is merged onto a same-named
     ``call_tool`` behavior entry so BOTH the declared contract and the
     implementation are bound to the one live tool name a dynamic scan will
-    see."""
-    consts = _collect_str_consts(tree)
+    see. ``base`` carries cross-module constants (see ``extract_tools``)."""
+    consts = _collect_str_consts(tree, base)
     module_functions = collect_module_functions(tree)
-    decorated = extract_tools(tree)
+    decorated = extract_tools(tree, base)
     by_name: Dict[str, ToolDef] = {td.name: td for td in decorated}
     for td in _extract_functional_registrations(tree, module_functions, consts):
         by_name.setdefault(td.name, td)

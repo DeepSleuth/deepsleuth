@@ -2261,3 +2261,23 @@ constant folder), `analysis/envdump.py` (whole-environment flow),
   (whose only source ships in ``dist/``) ingests its files.
   (`tests/test_target_loader.py`: entry-script vs. cwd, the no-source
   note, the data-dir rule, ``dist`` ingestion, the config fallback.)
+- **Python tool descriptions held in imported constants resolve
+  (`analysis/pyast.py`; `desc-poisoning`).** *Phase: listing (source).* The
+  v5.8 item-8 evaluator made an indirectly held description readable on
+  the JS/TS side; the Python extractor still read a description only
+  when it was a literal (or docstring) at the registration site, so a
+  tool registered with ``description=DESC`` where ``DESC`` was imported
+  from a sibling module (``from _d import DESC``) carried a BLANK
+  description into the contract and ``desc-poisoning`` never saw the
+  instruction — even though W7's cross-module machinery had already
+  computed the imported constants for the rest of the pass. The W7
+  constant environment now also seeds the tool extractor
+  (``extract_tools`` / ``extract_tools_all`` take a ``base`` table; the
+  entry module's own constants still win on collision), so a description
+  that is an imported name or an attribute of an imported module
+  (``_d.DESC``) resolves to its text and is analyzed exactly like a
+  literal at the site. (`tests/test_py_indirect_desc.py`, the Python
+  mirror of the v5.8 item-8 fixtures: `py_indirect_desc` — an imported
+  name and a module attribute, both `desc-poisoning` high/high — vs.
+  `py_indirect_desc_benign` clean, with every description resolved to
+  its full text.)
