@@ -38,9 +38,9 @@ yaml = ["PyYAML==6.0.2"]
 mcp = ["mcp<2"]
 
 [project.urls]
-Homepage = "https://github.com/DeepSleuth/deepsleuth"
-Repository = "https://github.com/DeepSleuth/deepsleuth"
-Issues = "https://github.com/DeepSleuth/deepsleuth/issues"
+Homepage = "https://github.com/DeepSleuth/deepsleuth-mcp"
+Repository = "https://github.com/DeepSleuth/deepsleuth-mcp"
+Issues = "https://github.com/DeepSleuth/deepsleuth-mcp/issues"
 
 [project.scripts]
 deepsleuth = "deepsleuth.__main__:main"

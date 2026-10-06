@@ -5,7 +5,7 @@ Thanks for your interest in improving deepsleuth.
 ## Getting started
 
 ```bash
-git clone https://github.com/DeepSleuth/deepsleuth.git
+git clone https://github.com/DeepSleuth/deepsleuth-mcp.git
 cd deepsleuth
 python -m deepsleuth --help
 python tests/run_all.py

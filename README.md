@@ -1,10 +1,10 @@
 # Deepsleuth — read the fine print
 
 <p>
-  <img src="https://raw.githubusercontent.com/DeepSleuth/deepsleuth/main/docs/deepsleuth-logo.svg" width="420" alt="Deepsleuth logo" title="Deepsleuth — read the fine print">
+  <img src="https://raw.githubusercontent.com/DeepSleuth/deepsleuth-mcp/main/docs/deepsleuth-logo.svg" width="420" alt="Deepsleuth logo" title="Deepsleuth — read the fine print">
 </p>
 
-[![CI](https://github.com/DeepSleuth/deepsleuth/actions/workflows/ci.yml/badge.svg)](https://github.com/DeepSleuth/deepsleuth/actions/workflows/ci.yml)
+[![CI](https://github.com/DeepSleuth/deepsleuth-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/DeepSleuth/deepsleuth-mcp/actions/workflows/ci.yml)
 
 **Deepsleuth** is a deterministic, no-LLM security scanner for MCP servers.
 It audits what a server *says* — and, more importantly, what it *does*.
@@ -43,7 +43,7 @@ Python 3.11+. No required third-party packages — the scanner speaks MCP over s
 itself, so it installs in externally-managed (PEP 668) environments.
 
 ```bash
-pip install git+https://github.com/DeepSleuth/deepsleuth.git   # zero required dependencies
+pip install git+https://github.com/DeepSleuth/deepsleuth-mcp.git   # zero required dependencies
 deepsleuth --help
 # or straight from the source tree:
 python -m deepsleuth --help
