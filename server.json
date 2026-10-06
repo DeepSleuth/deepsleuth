@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.DeepSleuth/deepsleuth",
+  "title": "Deepsleuth",
+  "description": "Deterministic, no-LLM security scanner for MCP servers, plus an inline proxy gate.",
+  "version": "1.0.3",
+  "websiteUrl": "https://github.com/DeepSleuth/deepsleuth-mcp",
+  "repository": {
+    "url": "https://github.com/DeepSleuth/deepsleuth-mcp",
+    "source": "github",
+    "id": "1407402821"
+  },
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/DeepSleuth/deepsleuth-mcp/main/docs/deepsleuth-icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": ["any"]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "deepsleuth",
+      "version": "1.0.3",
+      "registryBaseUrl": "https://pypi.org",
+      "transport": {"type": "stdio"}
+    }
+  ]
+}
