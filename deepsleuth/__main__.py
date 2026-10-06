@@ -3,9 +3,14 @@
     python -m deepsleuth scan       <target> [--no-dynamic] [--json out] [--timeout N]
     python -m deepsleuth proxy      <target> [--policy p] [--fail-closed] [--log run.jsonl]
     python -m deepsleuth proxy-eval <target> [--json out] [--timeout N] [--policy p]
+    python -m deepsleuth mcp        (or no arguments at all)
 
 ``scan`` exits 0 when clean and non-zero when a finding reaches ``--fail-severity``
 (default ``high``). Both frontends emit the identical rule 6 finding shape.
+
+BARE invocation starts the MCP stdio server (the same loop as
+``python -m deepsleuth.mcp_server``): registry clients install the PyPI
+package and run it with no arguments, and the server IS the product.
 """
 from __future__ import annotations
 
@@ -112,7 +117,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="deepsleuth",
                                 description="Deterministic deep-visibility MCP "
                                             "security scanner (no LLM).")
-    sub = p.add_subparsers(dest="cmd", required=True)
+    sub = p.add_subparsers(dest="cmd", required=False)
 
     s = sub.add_parser("scan", help="Frontend B — batch/sandbox scanner")
     s.add_argument("target", help="server dir, mcp.json, or launch command")
@@ -158,11 +163,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     d = sub.add_parser("detectors", help="list the registered detectors")
     d.set_defaults(func=cmd_detectors)
+    m = sub.add_parser("mcp", help="run deepsleuth itself as an MCP server (stdio)")
+    m.set_defaults(func=cmd_mcp)
     return p
+
+
+def cmd_mcp(_args) -> int:
+    """Run deepsleuth itself as an MCP stdio server (the same loop as
+    ``python -m deepsleuth.mcp_server``)."""
+    from .mcp_server import serve
+    return serve()
 
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
+    if args.cmd is None:
+        # bare invocation (``uvx deepsleuth``, the registry's default pypi
+        # runtime) starts the server, not a usage error
+        return cmd_mcp(args)
     return args.func(args)
 
 

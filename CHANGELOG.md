@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [1.0.2] — 2026-10-06
+
+registry-readiness fix.
+
+- bare invocation (``deepsleuth`` with no arguments, i.e. how registry
+  clients launch the PyPI package via ``uvx``) starts the MCP stdio server
+  instead of a usage error; explicit ``deepsleuth mcp`` subcommand as alias
+
 ## [1.0.1] — 2026-10-06
 
 fixes + agent-plugin packaging; first PyPI release.

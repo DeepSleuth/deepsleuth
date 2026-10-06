@@ -46,7 +46,7 @@ from .runner import registry_summary, run_phase
 from .scanner import scan
 from .target_loader import load_targets
 
-SERVER_INFO = {"name": "deepsleuth", "version": "1.0.1"}
+SERVER_INFO = {"name": "deepsleuth", "version": "1.0.2"}
 
 TOOLS = [
     {

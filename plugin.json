@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "deepsleuth",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Deterministic, no-LLM security scanner for MCP servers: static source analysis, manifest checks, and a sandboxed dynamic layer, plus an inline proxy gate.",
   "author": {
     "name": "DeepSleuth",
