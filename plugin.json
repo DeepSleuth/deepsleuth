@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "deepsleuth",
+  "version": "1.0.0",
+  "description": "Deterministic, no-LLM security scanner for MCP servers: static source analysis, manifest checks, and a sandboxed dynamic layer, plus an inline proxy gate.",
+  "author": {
+    "name": "DeepSleuth",
+    "url": "https://github.com/DeepSleuth"
+  },
+  "homepage": "https://github.com/DeepSleuth/deepsleuth-mcp",
+  "repository": "https://github.com/DeepSleuth/deepsleuth-mcp",
+  "license": "Apache-2.0",
+  "keywords": ["mcp", "security", "scanner", "audit", "supply-chain", "tool-poisoning"]
+}

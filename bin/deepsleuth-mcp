@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Agent Plugins stdio entry point: launches the deepsleuth MCP server
+# (the scanner AS a server: list_detectors / check_listing / scan_target).
+#
+# Conformant clients run this with the plugin root as the working directory
+# and PLUGIN_ROOT set; the fallback covers running it by hand from anywhere.
+set -euo pipefail
+
+root="${PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+cd "$root"
+
+# the scanner has zero third-party requirements — any python3.11+ works
+exec python3 -m deepsleuth.mcp_server "$@"

@@ -57,6 +57,18 @@ Deepsleuth is itself an MCP server, so agents can scan with it directly:
 
 Tools: `list_detectors`, `check_listing`, `scan_target`.
 
+### Install as an agent plugin
+
+The repo is a valid [Agent Plugins](https://open-plugins.com) package
+(`plugin.json` + `mcp.json`, spec 1.0.0): any compatible client can install it
+directly from the repository and gets the `deepsleuth` MCP server plus the
+`audit-mcp-server` skill. The stdio entry (`bin/deepsleuth-mcp`) needs only
+`python3.11+` — the scanner has zero third-party requirements:
+
+```json
+{"type": "stdio", "command": "./bin/deepsleuth-mcp"}
+```
+
 For the dynamic layer (Frontend B and `proxy-eval`) you need the **Docker CLI +
 daemon**. Without Docker the scanner **degrades gracefully**: static/manifest
 detectors still run and the skipped dynamic coverage is reported (never a crash).
