@@ -150,6 +150,16 @@ def _run_dynamic(ctx: ScanContext, target: Target, timeout: int,
 def scan_target(target: Target, *, do_dynamic: bool = True, timeout: int = 30,
                 allow_unsandboxed: bool = False) -> Tuple[List[Finding], ScanContext]:
     ctx = build_static_context(target)
+    if target.command and not target.root_dir and not target.source_files:
+        # a raw launch command that names no local source: without this note
+        # the report would look like a clean bill of health when in fact the
+        # static layer had nothing to chew on (first seen on bare ``npx``
+        # targets scanned from an unrelated working directory).
+        ctx.skipped.append(
+            "no local source analyzed for this command target: the launch "
+            "command names no local entry script, so only manifest checks "
+            "and the dynamic layer apply — point the scanner at the "
+            "server's directory (or its unpacked package) to scan source")
     if do_dynamic:
         _run_dynamic(ctx, target, timeout, allow_unsandboxed)
     else:

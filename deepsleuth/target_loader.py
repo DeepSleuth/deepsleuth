@@ -17,7 +17,9 @@ _PY_EXT = {".py"}
 _JS_EXT = {".js", ".mjs", ".cjs"}
 _TS_EXT = {".ts", ".tsx"}
 _MANIFEST_NAMES = {"package.json", "pyproject.toml", "setup.py", "setup.cfg"}
-_SKIP_DIRS = {"node_modules", ".git", "__pycache__", ".venv", "venv", "dist",
+# ``dist`` is intentionally NOT skipped: it is where unpacked npm packages
+# ship their (only) source, so skipping it would ingest zero files.
+_SKIP_DIRS = {"node_modules", ".git", "__pycache__", ".venv", "venv",
               "build", ".mypy_cache", ".pytest_cache", "site-packages"}
 _MAX_FILE_BYTES = 2_000_000
 _MAX_SOURCE_FILES = 400
@@ -66,7 +68,7 @@ def _collect_dir(root: str) -> (List[SourceFile], Dict[str, str], str):  # type:
 
 def _target_from_launch(target_id: str, name: Optional[str], command: str,
                         args: List[str], env: Dict[str, str],
-                        cwd: Optional[str]) -> Target:
+                        cwd: Optional[str], harvest_cwd: bool = True) -> Target:
     t = Target(
         target_id=target_id,
         command=command,
@@ -75,16 +77,40 @@ def _target_from_launch(target_id: str, name: Optional[str], command: str,
         cwd=cwd,
         server_name=name,
     )
-    # if the command references a local dir/file, harvest its source too
-    root = cwd
-    for cand in [cwd] + [a for a in ([command] + list(args or [])) if isinstance(a, str)]:
-        if cand and os.path.isdir(cand):
-            root = cand
+    # Harvest source from what the command names, not from the directory it
+    # happens to run in: a code entry file resolves to its own directory, a
+    # relative directory argument (``node .``) names itself, and an absolute
+    # directory argument is assumed to be a data workdir (a filesystem
+    # server's allowed root), not source. The cwd is only a fallback for
+    # config-file entries (where it is the config's own directory); a raw
+    # command with no local entry point harvests nothing rather than
+    # whatever folder the operator happened to scan from.
+    root: Optional[str] = None
+    cands = [command] + [a for a in (args or []) if isinstance(a, str)]
+    for cand in cands:
+        if not cand:
+            continue
+        if os.path.isabs(cand):
+            paths = [cand]
+        elif cwd:
+            paths = [os.path.join(cwd, cand)]
+        else:
+            paths = [cand]
+        for p in paths:
+            if os.path.isfile(p) and _lang_for(p):
+                root = os.path.dirname(os.path.abspath(p))
+                break
+            # a relative dir argument (``node .``) names the source root; an
+            # ABSOLUTE dir argument is a data workdir (a filesystem server's
+            # allowed root), not source.
+            if os.path.isdir(p) and not os.path.isabs(cand):
+                root = os.path.abspath(p)
+                break
+        if root:
             break
-        if cand and os.path.isfile(cand):
-            root = os.path.dirname(os.path.abspath(cand))
-            break
-    if root and os.path.isdir(root):
+    if root is None and harvest_cwd and cwd and os.path.isdir(cwd):
+        root = cwd
+    if root:
         t.root_dir = os.path.abspath(root)
         srcs, mans, runtime = _collect_dir(t.root_dir)
         t.source_files = srcs
@@ -180,7 +206,7 @@ def load_targets(spec: str) -> List[Target]:
     if parts:
         return [_target_from_launch(
             target_id=parts[0], name=None, command=parts[0], args=parts[1:],
-            env={}, cwd=os.getcwd(),
+            env={}, cwd=os.getcwd(), harvest_cwd=False,
         )]
     return []
 

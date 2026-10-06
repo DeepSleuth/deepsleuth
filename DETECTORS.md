@@ -2238,3 +2238,26 @@ constant folder), `analysis/envdump.py` (whole-environment flow),
   `data_supersession_prose_benign` clean (a note-reading tool, "values in the
   cache file may be outdated; this tool refreshes its own cache", a cache
   refresher, a usage hint, a self-stale file).
+
+### post-1.0 fixes (2026-10-06)
+
+- **Command targets harvest what the command names (`target_loader.py`;
+  `scanner.scan_target`).** *Phase: load.* A raw launch command
+  (``deepsleuth "npx -y pkg"``) fell back to harvesting the directory it
+  was run FROM: scanned from an empty directory the report was a clean
+  bill of health on zero analyzed files, and scanned from an unrelated
+  source tree it silently attributed that tree's files (up to the 400-file
+  cap) to the target. Source is now harvested only from what the command
+  itself names: a code entry file resolves to its own directory
+  (``python3 srv/server.py``), a relative directory argument names itself
+  (``node .``), and an absolute directory argument is treated as a data
+  workdir (a filesystem server's allowed root), never as source. The
+  working directory is no longer a fallback for raw commands — it remains
+  one for ``mcp.json`` entries, where the cwd is the config's own
+  directory and the meaning is real. A command target with no local
+  source now says so in the report (``ctx.skipped``: "no local source
+  analyzed for this command target ...") instead of reading as a pass;
+  ``dist`` is no longer a skip directory, so an unpacked npm package
+  (whose only source ships in ``dist/``) ingests its files.
+  (`tests/test_target_loader.py`: entry-script vs. cwd, the no-source
+  note, the data-dir rule, ``dist`` ingestion, the config fallback.)

@@ -16,7 +16,8 @@ MODULES = ["test_normalize", "test_taint", "test_gate", "test_end_to_end",
            "test_response_detectors", "test_multicall", "test_calibration",
            "test_state_mechanisms", "test_dynamic_e2e", "test_structure_rules",
            "test_pinning", "test_phase4", "test_phase2_static", "test_phase3",
-           "test_v3_guide", "test_v4_guide", "test_v5_guide", "test_v6_guide"]
+           "test_v3_guide", "test_v4_guide", "test_v5_guide", "test_v6_guide",
+           "test_target_loader"]
 
 
 def main() -> int:
