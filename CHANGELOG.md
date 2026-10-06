@@ -4,6 +4,14 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [1.0.3] — 2026-10-06
+
+registry submission fix.
+
+- the PyPI package README carries the official-registry marker
+  (``mcp-name: io.github.DeepSleuth/deepsleuth``) required for
+  package-ownership validation on registry submission
+
 ## [1.0.2] — 2026-10-06
 
 registry-readiness fix.

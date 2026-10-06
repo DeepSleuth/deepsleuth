@@ -171,3 +171,9 @@ and how to add a detector.
 
 Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 Found a security issue? Please follow [SECURITY.md](SECURITY.md).
+
+---
+
+Listed in the official MCP Registry:
+
+mcp-name: io.github.DeepSleuth/deepsleuth
