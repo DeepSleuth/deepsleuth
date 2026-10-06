@@ -50,12 +50,12 @@ no ground truth; the servers are overwhelmingly ordinary.
 
 | Version | Tools with any finding | Tools actionable | Tools withheld by the default policy | Servers with an actionable finding |
 |---|---|---|---|---|
-| original (`3253f8b`) | 110 | 110 | 104 | 42 |
-| round 1 (`5ae56ca`) | 87 | 87 | 78 | 41 |
-| precision round (`742158b`) | 83 | 48 | 37 | 22 |
-| first mechanism round (`d2cba73`) | 64 | 24 | 21 | 15 |
-| second mechanism round (`3654815`) | 64 | 24 | 21 | 15 |
-| **this version (`334bee9`)** | **63 (4.1%)** | **19 (1.2%)** | **16 (1.0%)** | **12 (7%)** |
+| original (`9cb6d5a`) | 110 | 110 | 104 | 42 |
+| round 1 (`e68ab6b`) | 87 | 87 | 78 | 41 |
+| precision round (`fc9ccaa`) | 83 | 48 | 37 | 22 |
+| first mechanism round (`e04017d`) | 64 | 24 | 21 | 15 |
+| second mechanism round (`296ccb7`) | 64 | 24 | 21 | 15 |
+| **this version (`4d6bc13`)** | **63 (4.1%)** | **19 (1.2%)** | **16 (1.0%)** | **12 (7%)** |
 
 Other corpora never used for tuning: MCP-Universe (13 Python servers, 159
 tools) 5 tools actionable, two of them genuine command runners; sentinel-scan-cli

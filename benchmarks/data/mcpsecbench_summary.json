@@ -2,7 +2,7 @@
   "dataset": "mcpsecbench",
   "total_malicious": 9,
   "total_benign": 6,
-  "scored_commit": "334bee9d96de83958c9e0472ee6da698429a91e5",
+  "scored_commit": "4d6bc135e017aa7a972e2aca2a4a6aa5a4c3ae66",
   "loose_recall_count": 9,
   "loose_recall_pct": 100.0,
   "loose_recall_targets": [
