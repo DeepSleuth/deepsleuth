@@ -3,13 +3,13 @@
   "name": "io.github.DeepSleuth/deepsleuth",
   "title": "Deepsleuth",
   "description": "Deterministic, no-LLM security scanner for MCP servers, plus an inline proxy gate.",
-  "version": "1.0.3",
   "websiteUrl": "https://github.com/DeepSleuth/deepsleuth-mcp",
   "repository": {
     "url": "https://github.com/DeepSleuth/deepsleuth-mcp",
     "source": "github",
     "id": "1407402821"
   },
+  "version": "1.0.4",
   "icons": [
     {
       "src": "https://raw.githubusercontent.com/DeepSleuth/deepsleuth-mcp/main/docs/deepsleuth-icon.svg",
@@ -20,8 +20,8 @@
   "packages": [
     {
       "registryType": "pypi",
-      "identifier": "deepsleuth",
-      "version": "1.0.3",
+      "identifier": "security-scanner-deepsleuth-mcp",
+      "version": "1.0.4",
       "registryBaseUrl": "https://pypi.org",
       "transport": {"type": "stdio"}
     }

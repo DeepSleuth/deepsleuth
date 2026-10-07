@@ -3,8 +3,8 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "deepsleuth"
-version = "1.0.3"
+name = "security-scanner-deepsleuth-mcp"
+version = "1.0.4"
 description = "Deepsleuth — read the fine print. Deterministic deep-visibility security scanner for MCP servers (no LLM)."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -45,6 +45,9 @@ Issues = "https://github.com/DeepSleuth/deepsleuth-mcp/issues"
 
 [project.scripts]
 deepsleuth = "deepsleuth.__main__:main"
+# the distribution is named security-scanner-deepsleuth-mcp; uvx and
+# registry clients run the command matching the package name, so ship it too
+security-scanner-deepsleuth-mcp = "deepsleuth.__main__:main"
 
 [tool.setuptools]
 packages = [

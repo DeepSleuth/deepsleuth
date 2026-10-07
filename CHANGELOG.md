@@ -4,6 +4,16 @@ All notable changes to deepsleuth are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [semver](https://semver.org/).
 
+## [1.0.4] — 2026-10-07
+
+distribution rename.
+
+- the PyPI distribution is now ``security-scanner-deepsleuth-mcp``
+  (what it is + the brand; the project, repo, CLI and MCP server stay
+  ``deepsleuth``) — the package ships both console scripts, so
+  ``uvx security-scanner-deepsleuth-mcp`` and ``deepsleuth`` run the same
+  tool, and ``pip install deepsleuth`` 1.0.3 remains as the previous name
+
 ## [1.0.3] — 2026-10-06
 
 registry submission fix.

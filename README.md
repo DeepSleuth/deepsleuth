@@ -43,13 +43,19 @@ Python 3.11+. No required third-party packages — the scanner speaks MCP over s
 itself, so it installs in externally-managed (PEP 668) environments.
 
 ```bash
-pip install deepsleuth                                             # published on PyPI
+pip install security-scanner-deepsleuth-mcp                             # published on PyPI
 # or from source:
 pip install git+https://github.com/DeepSleuth/deepsleuth-mcp.git   # zero required dependencies
 deepsleuth --help
 # or straight from the source tree:
 python -m deepsleuth --help
 ```
+
+The PyPI distribution is named `security-scanner-deepsleuth-mcp` (what it
+is, plus the brand); the tool, repo and MCP server are `deepsleuth`. The
+package installs the `deepsleuth` console command — and an alias script
+under the distribution's own name, so `uvx security-scanner-deepsleuth-mcp`
+runs the server for registry clients.
 
 Deepsleuth is itself an MCP server, so agents can scan with it directly:
 
